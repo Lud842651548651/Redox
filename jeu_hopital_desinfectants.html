@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Code Hygiène – Mission au CHU</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Orbitron:wght@600;800&family=Manrope:wght@600;800&family=Bangers&family=Press+Start+2P&family=Fredoka:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF5F7; --card:#FFFFFF; --ink:#1D2B36; --muted:#5B6B78;
+  --teal:#0E7C86; --teal-l:#D7EEF0; --blue:#2F6FB3; --blue-l:#E3EEFA;
+  --green:#2E8B57; --green-l:#E2F4EA; --red:#C0392B; --red-l:#FBE7E4;
+  --amber:#B7791F; --amber-l:#FFF4DC; --line:#D3DEE5;
+  --fs:18px;
+}
+*{box-sizing:border-box}
+html{font-size:var(--fs)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Atkinson Hyperlegible",Arial,sans-serif;line-height:1.5}
+.iode{font-family:"Times New Roman",Times,"Liberation Serif",serif}
+sub,sup{font-size:.7em;line-height:0}
+button{font:inherit;cursor:pointer}
+header{background:var(--teal);color:#fff;padding:.6rem 1rem;display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;position:sticky;top:0;z-index:5}
+header .logo{display:flex;align-items:center;gap:.5rem;font-weight:700;font-size:1.05rem}
+header .cross{width:30px;height:30px;background:#fff;border-radius:6px;position:relative;flex:none}
+header .cross:before,header .cross:after{content:"";position:absolute;background:var(--red);left:50%;top:50%;transform:translate(-50%,-50%)}
+header .cross:before{width:18px;height:6px}
+header .cross:after{width:6px;height:18px}
+header .who{font-size:.85rem;opacity:.9}
+header .sp{flex:1}
+header .hbtn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.5);color:#fff;border-radius:8px;padding:.25rem .7rem;font-size:.85rem}
+header .hbtn:hover{background:rgba(255,255,255,.28)}
+main{max-width:860px;margin:0 auto;padding:1rem}
+.card{background:var(--card);border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:1.2rem 1.3rem;margin:1rem 0}
+h1{font-size:1.6rem;margin:.2rem 0 .6rem;color:var(--teal)}
+h2{font-size:1.25rem;margin:.2rem 0 .6rem;color:var(--teal)}
+h3{font-size:1.05rem;margin:1rem 0 .3rem;color:var(--blue)}
+p{margin:.4rem 0}
+label{display:block;font-weight:700;margin:.6rem 0 .2rem}
+input[type=text]{font:inherit;width:100%;padding:.5rem .7rem;border:2px solid var(--line);border-radius:8px}
+input[type=text]:focus,input.coef:focus{outline:3px solid var(--blue-l);border-color:var(--blue)}
+.btn{background:var(--teal);color:#fff;border:none;border-radius:10px;padding:.6rem 1.2rem;font-weight:700}
+.btn:hover{filter:brightness(1.08)}
+.btn:disabled{background:#9FB3BD;cursor:not-allowed}
+.btn.ghost{background:#fff;color:var(--teal);border:2px solid var(--teal)}
+.row{display:flex;gap:.8rem;flex-wrap:wrap;align-items:center}
+.err{color:var(--red);font-size:.9rem;min-height:1.2em}
+/* carte des étapes */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1rem}
+.step{border:2px solid var(--line);border-radius:14px;padding:1rem;background:#fff;display:flex;flex-direction:column;gap:.4rem}
+.step .num{width:38px;height:38px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700}
+.step.locked{opacity:.55}
+.step.locked .num{background:#9FB3BD}
+.step.done{border-color:var(--green);background:var(--green-l)}
+.step.done .num{background:var(--green)}
+.step .lieu{color:var(--muted);font-size:.9rem}
+.step .etat{font-size:.9rem;font-weight:700}
+.step .btn{margin-top:auto}
+/* cours */
+.cours{border-left:6px solid var(--amber);background:var(--amber-l);border-radius:10px;padding:.8rem 1rem}
+.cours .eq{text-align:center;font-size:1.1rem;margin:.5rem 0}
+.retenir{border:2px solid var(--amber);border-radius:10px;padding:.6rem .9rem;background:#fff;margin:.6rem 0}
+/* questions */
+.dots{display:flex;gap:.4rem;margin:.2rem 0 .8rem}
+.dot{width:28px;height:28px;border-radius:50%;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:.8rem;color:var(--muted);background:#fff}
+.dot.cur{border-color:var(--blue);color:var(--blue);font-weight:700}
+.dot.ok{background:var(--green);border-color:var(--green);color:#fff}
+.dot.ko{background:var(--red);border-color:var(--red);color:#fff}
+.enonce{font-size:1.05rem}
+.donnees{background:var(--blue-l);border-radius:10px;padding:.5rem .9rem;margin:.6rem 0}
+.donnees .eq{margin:.2rem 0}
+.choices{display:grid;gap:.5rem;margin:.8rem 0}
+.choice{text-align:left;background:#fff;border:2px solid var(--line);border-radius:10px;padding:.6rem .9rem}
+.choice:hover:not(:disabled){border-color:var(--blue)}
+.choice.sel{border-color:var(--blue);background:var(--blue-l)}
+.choice.good{border-color:var(--green);background:var(--green-l)}
+.choice.bad{border-color:var(--red);background:var(--red-l)}
+.choice:disabled{cursor:default}
+.pictos{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.7rem;margin:.8rem 0}
+.picto{background:#fff;border:2px solid var(--line);border-radius:12px;padding:.5rem;display:flex;flex-direction:column;align-items:center}
+.picto img{width:88px;height:88px}
+.picto span{font-size:.8rem;color:var(--muted)}
+.picto.sel{border-color:var(--blue);background:var(--blue-l)}
+.picto.good{border-color:var(--green);background:var(--green-l)}
+.picto.bad{border-color:var(--red);background:var(--red-l)}
+.demiswrap{display:flex;overflow-x:auto;margin-top:.3rem}
+.demis{display:grid;grid-template-columns:auto max-content auto max-content;column-gap:.45em;row-gap:.35em;align-items:center;margin:0 auto 0 0;white-space:nowrap;font-size:1em}
+.demis .ctrl{display:flex;gap:.35em;align-items:center}
+.demis .dl{justify-self:end}
+.demis .de{justify-self:center}
+.inv{font:inherit;font-weight:700;min-width:2em;padding:0 .3em;border-radius:8px;border:2px solid var(--blue);background:var(--card);color:var(--blue)}
+.inv.on{background:var(--blue);color:var(--card)}
+.inv:disabled{opacity:.6;cursor:default}
+.mult{display:inline-flex;align-items:center;gap:.25rem;font-weight:700;margin:0}
+.mult select{font:inherit;padding:.1rem .3rem;border-radius:8px;border:2px solid var(--blue);background:var(--card);color:var(--ink)}
+.eqline{font-size:1.15rem;margin:1rem 0;line-height:1.9;display:flex;overflow-x:auto;padding:.2rem 0}
+.eqline .eqin{margin:0 auto;white-space:nowrap}
+.eqline .op{margin:0 .22em}
+input.coef{width:1.7em;height:1.6em;text-align:center;font:inherit;font-weight:700;padding:0;border:2px solid var(--blue);border-radius:6px;margin:0 .14em 0 0;vertical-align:middle}
+input.coef.good{border-color:var(--green);background:var(--green-l)}
+input.coef.bad{border-color:var(--red);background:var(--red-l)}
+.hints{display:flex;gap:.6rem;flex-wrap:wrap;margin:.6rem 0}
+.hint-btn{background:var(--amber-l);border:2px solid var(--amber);color:#7A4F0A;border-radius:10px;padding:.35rem .8rem;font-size:.9rem}
+.hint-btn:disabled{opacity:.5;cursor:not-allowed}
+.hint{background:var(--amber-l);border-radius:10px;padding:.5rem .8rem;margin:.4rem 0;font-size:.95rem}
+.fb{border-radius:10px;padding:.6rem .9rem;margin:.7rem 0}
+.fb.good{background:var(--green-l);border-left:6px solid var(--green)}
+.fb.bad{background:var(--red-l);border-left:6px solid var(--red)}
+.score{font-size:2.2rem;font-weight:700;text-align:center;margin:.5rem 0}
+.center{text-align:center}
+.note{font-size:.85rem;color:var(--muted)}
+.status{margin-top:.6rem;font-size:.95rem}
+.hidden{display:none}
+.big{font-size:3rem;line-height:1}
+@media (max-width:560px){
+  main{padding:.4rem}.card{padding:.9rem .8rem}
+  header{position:relative;padding:.45rem .6rem;gap:.4rem}
+  header .logo{font-size:.9rem} header .who{display:none}
+  header .hbtn .lbl{display:none} header .hbtn{padding:.2rem .55rem}
+  #btnSend{font-size:.8rem}
+}
+
+/* =====================================================================
+   THÈMES : body[data-theme="neon|clean|comic|pixel|bio"]
+   ===================================================================== */
+html,body{min-height:100vh}
+body{background-attachment:fixed}
+#deco{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+main,header{position:relative;z-index:1}
+header{position:sticky}
+.ecg{display:none}
+
+/* ---------- 1. URGENCES NÉON ---------- */
+body[data-theme="neon"]{
+  --bg:#070B14; --card:#0F1626; --ink:#E6F1FF; --muted:#8FA3BF; --line:#243250;
+  --teal:#00F0FF; --teal-l:#08303A; --blue:#00F0FF; --blue-l:#0B2A3A;
+  --green:#39FF88; --green-l:#0C2E1E; --red:#FF3D71; --red-l:#33111D;
+  --amber:#FFC94D; --amber-l:#2A220C;
+  background:radial-gradient(circle at 20% 0%,#10213F 0,transparent 50%),radial-gradient(circle at 100% 100%,#2A0D2E 0,transparent 45%),#070B14;
+}
+body[data-theme="neon"] h1,body[data-theme="neon"] h2,body[data-theme="neon"] header .logo,body[data-theme="neon"] .score{font-family:"Orbitron",sans-serif;letter-spacing:.04em}
+body[data-theme="neon"] h1,body[data-theme="neon"] h2{color:#00F0FF;text-shadow:0 0 12px rgba(0,240,255,.6)}
+body[data-theme="neon"] h3{color:#FF3D71}
+body[data-theme="neon"] header{background:rgba(7,11,20,.85);backdrop-filter:blur(8px);border-bottom:1px solid #00F0FF55;box-shadow:0 0 24px rgba(0,240,255,.25)}
+body[data-theme="neon"] .ecg{display:block;position:absolute;left:0;right:0;width:100%;bottom:-2px;height:22px;opacity:.9}
+body[data-theme="neon"] .ecg path{stroke:#39FF88;stroke-width:2;fill:none;filter:drop-shadow(0 0 4px #39FF88);stroke-dasharray:1400;stroke-dashoffset:1400;animation:ecg var(--ecg-t,1.6s) linear infinite}
+@keyframes ecg{to{stroke-dashoffset:0}}
+body[data-theme="neon"] .card{border:1px solid #00F0FF33;box-shadow:0 0 0 1px #00F0FF11,0 10px 40px rgba(0,0,0,.5),inset 0 0 40px rgba(0,240,255,.04)}
+body[data-theme="neon"] .btn{background:transparent;color:#00F0FF;border:2px solid #00F0FF;box-shadow:0 0 14px rgba(0,240,255,.45),inset 0 0 10px rgba(0,240,255,.2);text-transform:uppercase;letter-spacing:.06em}
+body[data-theme="neon"] .btn:hover{background:#00F0FF;color:#070B14}
+body[data-theme="neon"] .btn.ghost{color:#FF3D71;border-color:#FF3D71;box-shadow:0 0 12px rgba(255,61,113,.4)}
+body[data-theme="neon"] .btn:disabled{color:#4A5A75;border-color:#2A3650;box-shadow:none;background:transparent}
+body[data-theme="neon"] .step{background:#0B1220}
+body[data-theme="neon"] .step.done{box-shadow:0 0 18px rgba(57,255,136,.35)}
+body[data-theme="neon"] .num{box-shadow:0 0 12px currentColor}
+body[data-theme="neon"] .choice,body[data-theme="neon"] .picto{background:#0B1220;color:var(--ink)}
+body[data-theme="neon"] .choice:hover:not(:disabled){box-shadow:0 0 12px rgba(0,240,255,.4)}
+body[data-theme="neon"] .picto img{background:#fff;border-radius:8px}
+body[data-theme="neon"] input[type=text],body[data-theme="neon"] input.coef{background:#0B1220;color:#fff;border-color:#2A3A5C}
+body[data-theme="neon"] .cours{background:#14130A;color:#F4ECD0}
+body[data-theme="neon"] .hint-btn{background:#2A220C;color:#FFC94D}
+body[data-theme="neon"] .dot{background:#0B1220}
+body[data-theme="neon"] .score{color:#39FF88;text-shadow:0 0 18px #39FF88}
+
+/* ---------- 2. BLOUSE BLANCHE (clinique épuré) ---------- */
+body[data-theme="clean"]{
+  --bg:#F4F7F6; --card:#FFFFFF; --ink:#13201C; --muted:#64736E; --line:#E1E8E5;
+  --teal:#0F9D7A; --teal-l:#DDF3EC; --blue:#3355FF; --blue-l:#E8ECFF;
+  --green:#0F9D7A; --green-l:#E0F5EE; --red:#E5484D; --red-l:#FDECEC; --amber:#E8A10C; --amber-l:#FFF6E0;
+  background:linear-gradient(180deg,#E8F4F0 0,#F4F7F6 320px);
+}
+body[data-theme="clean"] h1,body[data-theme="clean"] h2,body[data-theme="clean"] header .logo,body[data-theme="clean"] .score{font-family:"Manrope",sans-serif;font-weight:800;letter-spacing:-.02em}
+body[data-theme="clean"] h1{font-size:2.2rem;color:var(--ink)}
+body[data-theme="clean"] h2{color:var(--ink)}
+body[data-theme="clean"] header{background:rgba(255,255,255,.8);backdrop-filter:blur(12px);color:var(--ink);border-bottom:1px solid var(--line)}
+body[data-theme="clean"] header .hbtn{color:var(--ink);border-color:var(--line);background:#fff}
+body[data-theme="clean"] header .cross{background:var(--teal)}
+body[data-theme="clean"] header .cross:before,body[data-theme="clean"] header .cross:after{background:#fff}
+body[data-theme="clean"] .card{border-radius:24px;box-shadow:0 1px 2px rgba(16,40,32,.04),0 12px 32px rgba(16,40,32,.08);padding:1.6rem 1.8rem}
+body[data-theme="clean"] .btn{border-radius:999px;padding:.7rem 1.5rem;box-shadow:0 6px 16px rgba(15,157,122,.3)}
+body[data-theme="clean"] .btn.ghost{box-shadow:none;border-radius:999px}
+body[data-theme="clean"] .btn:disabled{box-shadow:none}
+body[data-theme="clean"] .step{border:none;border-radius:20px;background:#F8FBFA;box-shadow:inset 0 0 0 1px var(--line)}
+body[data-theme="clean"] .step.done{box-shadow:inset 0 0 0 2px var(--green)}
+body[data-theme="clean"] .choice,body[data-theme="clean"] .picto{border-radius:16px;border-width:1.5px}
+body[data-theme="clean"] .cours{border-left:none;border-radius:18px;background:#FFF9EC}
+body[data-theme="clean"] .dot{border-radius:8px}
+
+/* ---------- 3. BANDE DESSINÉE ---------- */
+body[data-theme="comic"]{
+  --bg:#FFE45C; --card:#FFFFFF; --ink:#111; --muted:#333; --line:#111;
+  --teal:#FF3B30; --teal-l:#FFE1DE; --blue:#1E6BFF; --blue-l:#DCE8FF;
+  --green:#18B85A; --green-l:#D9F7E5; --red:#FF3B30; --red-l:#FFE1DE; --amber:#111; --amber-l:#FFF7C2;
+  background-color:#FFE45C;
+  background-image:radial-gradient(#E8C200 1.6px,transparent 1.7px);background-size:14px 14px;
+}
+body[data-theme="comic"] h1,body[data-theme="comic"] h2,body[data-theme="comic"] header .logo,body[data-theme="comic"] .score,body[data-theme="comic"] .btn,body[data-theme="comic"] .num{font-family:"Bangers",cursive;letter-spacing:.06em;font-weight:400}
+body[data-theme="comic"] h1{font-size:2.6rem;color:#FF3B30;-webkit-text-stroke:1.5px #111;text-shadow:3px 3px 0 #111}
+body[data-theme="comic"] h2{font-size:1.6rem;color:#1E6BFF;text-shadow:2px 2px 0 #111}
+body[data-theme="comic"] header{background:#1E6BFF;border-bottom:4px solid #111}
+body[data-theme="comic"] header .logo{font-size:1.4rem;text-shadow:2px 2px 0 #111}
+body[data-theme="comic"] .card{border:4px solid #111;border-radius:6px;box-shadow:8px 8px 0 #111;transform:rotate(-.3deg)}
+body[data-theme="comic"] .btn{border:3px solid #111;border-radius:6px;box-shadow:4px 4px 0 #111;font-size:1.25rem;background:#FF3B30}
+body[data-theme="comic"] .btn:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 #111}
+body[data-theme="comic"] .btn.ghost{background:#fff;color:#111}
+body[data-theme="comic"] .btn:disabled{background:#bbb;box-shadow:2px 2px 0 #111}
+body[data-theme="comic"] .step{border:3px solid #111;border-radius:6px;box-shadow:4px 4px 0 #111}
+body[data-theme="comic"] .step:nth-child(2){transform:rotate(.6deg)}
+body[data-theme="comic"] .step:nth-child(3){transform:rotate(-.6deg)}
+body[data-theme="comic"] .step.done{background:#D9F7E5}
+body[data-theme="comic"] .num{border:3px solid #111;font-size:1.3rem}
+body[data-theme="comic"] .choice,body[data-theme="comic"] .picto{border:3px solid #111;border-radius:6px;box-shadow:3px 3px 0 #111}
+body[data-theme="comic"] .choice:hover:not(:disabled){background:#FFF7C2}
+body[data-theme="comic"] .cours{border:3px solid #111;border-radius:18px;background:#fff;position:relative}
+body[data-theme="comic"] .enonce{background:#fff;border:3px solid #111;border-radius:22px;padding:.7rem 1rem;position:relative;margin-bottom:1.2rem}
+body[data-theme="comic"] .enonce:after{content:"";position:absolute;left:40px;bottom:-16px;border:14px solid transparent;border-top-color:#111;border-bottom:0}
+body[data-theme="comic"] .hint-btn{border:3px solid #111;background:#FFF7C2;color:#111;box-shadow:2px 2px 0 #111}
+body[data-theme="comic"] .dot{border:2px solid #111}
+body[data-theme="comic"] input.coef,body[data-theme="comic"] input[type=text]{border:3px solid #111;border-radius:6px}
+body[data-theme="comic"] .fb{border:3px solid #111;border-left-width:3px;box-shadow:3px 3px 0 #111}
+body[data-theme="comic"] .score{font-size:4rem;color:#FF3B30;-webkit-text-stroke:2px #111;text-shadow:4px 4px 0 #111}
+
+/* ---------- 4. ARCADE PIXEL ---------- */
+body[data-theme="pixel"]{
+  --bg:#1A1C2C; --card:#262B44; --ink:#F4F4F4; --muted:#94B0C2; --line:#566C86;
+  --teal:#41A6F6; --teal-l:#1F3B5C; --blue:#41A6F6; --blue-l:#1F3B5C;
+  --green:#38B764; --green-l:#1E3D2C; --red:#E43B44; --red-l:#47202A; --amber:#FFCD75; --amber-l:#3D3424;
+  background:#1A1C2C;
+  background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:16px 16px;
+}
+body[data-theme="pixel"] h1,body[data-theme="pixel"] h2,body[data-theme="pixel"] header .logo,body[data-theme="pixel"] .score,body[data-theme="pixel"] .btn,body[data-theme="pixel"] .num,body[data-theme="pixel"] .dot{font-family:"Press Start 2P",monospace;font-weight:400}
+body[data-theme="pixel"] h1{font-size:1.3rem;color:#FFCD75;text-shadow:3px 3px 0 #B13E53;line-height:1.6}
+body[data-theme="pixel"] h2{font-size:.95rem;color:#73EFF7;line-height:1.6}
+body[data-theme="pixel"] h3{color:#FFCD75}
+body[data-theme="pixel"] header{background:#333C57;border-bottom:4px solid #000}
+body[data-theme="pixel"] header .logo{font-size:.75rem}
+body[data-theme="pixel"] header .hbtn{border-radius:0;border:2px solid #000;background:#566C86}
+body[data-theme="pixel"] .card{border-radius:0;box-shadow:0 0 0 4px #000,8px 8px 0 4px #000;border:4px solid #94B0C2}
+body[data-theme="pixel"] .btn{border-radius:0;font-size:.7rem;padding:.9rem 1.1rem;background:#38B764;color:#000;box-shadow:inset -4px -4px 0 #257953,inset 4px 4px 0 #A7F070,0 0 0 3px #000}
+body[data-theme="pixel"] .btn.ghost{background:#94B0C2;color:#000;border:none;box-shadow:inset -4px -4px 0 #566C86,inset 4px 4px 0 #F4F4F4,0 0 0 3px #000}
+body[data-theme="pixel"] .btn:active{transform:translateY(2px)}
+body[data-theme="pixel"] .btn:disabled{background:#566C86;box-shadow:0 0 0 3px #000}
+body[data-theme="pixel"] .step{border-radius:0;background:#333C57;border:3px solid #000}
+body[data-theme="pixel"] .step.done{background:#1E3D2C;border-color:#38B764}
+body[data-theme="pixel"] .num,body[data-theme="pixel"] .dot{border-radius:0;font-size:.6rem}
+body[data-theme="pixel"] .choice,body[data-theme="pixel"] .picto{border-radius:0;background:#333C57;color:var(--ink);border:3px solid #000}
+body[data-theme="pixel"] .choice:hover:not(:disabled):before{content:"▶ ";color:#FFCD75}
+body[data-theme="pixel"] .picto img{background:#fff;image-rendering:pixelated}
+body[data-theme="pixel"] .cours{border-radius:0;background:#2E2A22;color:#F4F4F4}
+body[data-theme="pixel"] .hint-btn{border-radius:0;background:#3D3424;color:#FFCD75}
+body[data-theme="pixel"] input[type=text],body[data-theme="pixel"] input.coef{border-radius:0;background:#1A1C2C;color:#fff;border:3px solid #94B0C2}
+body[data-theme="pixel"] .fb{border-radius:0}
+body[data-theme="pixel"] .score{font-size:1.8rem;color:#FFCD75;text-shadow:4px 4px 0 #B13E53}
+body[data-theme="pixel"] .big{filter:drop-shadow(4px 4px 0 #000)}
+
+/* ---------- 5. MICROSCOPE / BIO ---------- */
+body[data-theme="bio"]{
+  --bg:#0D1B2A; --card:rgba(255,255,255,.1); --ink:#F1F7F4; --muted:#B8CBC4; --line:rgba(255,255,255,.22);
+  --teal:#7CF29C; --teal-l:rgba(124,242,156,.15); --blue:#B892FF; --blue-l:rgba(184,146,255,.18);
+  --green:#7CF29C; --green-l:rgba(124,242,156,.18); --red:#FF7A8A; --red-l:rgba(255,122,138,.18); --amber:#FFD166; --amber-l:rgba(255,209,102,.14);
+  background:radial-gradient(circle at 30% 20%,#1B4D5C 0,transparent 45%),radial-gradient(circle at 80% 70%,#3B1F5C 0,transparent 50%),#0D1B2A;
+}
+body[data-theme="bio"] h1,body[data-theme="bio"] h2,body[data-theme="bio"] header .logo,body[data-theme="bio"] .score{font-family:"Fredoka",sans-serif;font-weight:600}
+body[data-theme="bio"] h1{font-size:2.2rem;background:linear-gradient(90deg,#7CF29C,#B892FF);-webkit-background-clip:text;background-clip:text;color:transparent}
+body[data-theme="bio"] h2{color:#7CF29C}
+body[data-theme="bio"] h3{color:#B892FF}
+body[data-theme="bio"] header{background:rgba(13,27,42,.6);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+body[data-theme="bio"] .card{backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--line);border-radius:28px;box-shadow:0 20px 50px rgba(0,0,0,.35)}
+body[data-theme="bio"] .btn{border-radius:999px;background:linear-gradient(90deg,#7CF29C,#4FD1C5);color:#0D1B2A}
+body[data-theme="bio"] .btn.ghost{background:transparent;color:#7CF29C;border:2px solid #7CF29C}
+body[data-theme="bio"] .btn:disabled{background:rgba(255,255,255,.15);color:#7C8F99}
+body[data-theme="bio"] .step{background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:22px}
+body[data-theme="bio"] .step.done{background:rgba(124,242,156,.12);border-color:#7CF29C}
+body[data-theme="bio"] .num{color:#0D1B2A}
+body[data-theme="bio"] .choice,body[data-theme="bio"] .picto{background:rgba(255,255,255,.06);color:var(--ink);border-radius:18px;border-color:var(--line)}
+body[data-theme="bio"] .picto img{background:#fff;border-radius:12px}
+body[data-theme="bio"] input[type=text],body[data-theme="bio"] input.coef{background:rgba(255,255,255,.08);color:#fff;border-color:var(--line)}
+body[data-theme="bio"] .cours{border-radius:18px;color:var(--ink)}
+body[data-theme="bio"] .hint-btn{background:rgba(255,209,102,.15);color:#FFD166;border-color:#FFD166;border-radius:999px}
+body[data-theme="bio"] .dot{background:transparent}
+body[data-theme="bio"] .blob{position:absolute;border-radius:50%;opacity:.55;animation:float 18s ease-in-out infinite}
+body[data-theme="bio"] .bact{position:absolute;opacity:.5;animation:float 22s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translate(0,0) rotate(0)}50%{transform:translate(30px,-40px) rotate(20deg)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+
+</style>
+</head>
+<body data-theme="clean">
+<div id="deco" aria-hidden="true"></div>
+<header>
+  <svg class="ecg" viewBox="0 0 1200 22" preserveAspectRatio="none" aria-hidden="true"><path d="M0,14 L380,14 L400,14 L410,4 L420,20 L432,1 L444,18 L452,14 L800,14 L820,14 L830,4 L840,20 L852,1 L864,18 L872,14 L1200,14"/></svg>
+  <div class="logo"><div class="cross" aria-hidden="true"></div>Code Hygiène – Mission au CHU</div>
+  <div class="who" id="who"></div>
+  <div class="sp"></div>
+  <button class="hbtn" id="btnSon" title="Activer ou couper le bip cardiaque">🔊 Son</button>
+  <button class="hbtn" id="btnLisible" title="Changer d'affichage">👁 Version plus lisible</button>
+  <button class="hbtn" id="btnFont" title="Agrandir ou réduire le texte" aria-label="Taille du texte">Aa<span class="lbl"> taille du texte</span></button>
+  <button class="hbtn hidden" id="btnSend">Envoyer mes résultats</button>
+</header>
+<main id="app"></main>
+
+<script>
+/* ================================================================ réglages */
+const WORKER = "https://resultatpolenord.lud-tek.workers.dev/";
+const JEU = "hopital_desinfectants_1ST2S";
+const NB_Q = 6, SEUIL = 5, RAPIDE_S = 5;
+let TEST = false;   // mode test enseignant : prénom « Test » + nom « T »
+const PICTOS = {"corrosif": "data:image/jpeg;base64,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", "inflammable": "data:image/jpeg;base64,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", "comburant": "data:image/jpeg;base64,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", "nocif": "data:image/jpeg;base64,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", "environnement": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEBAYFBQUGBgYHCQ4JCQgICRINDQoOFRIWFhUSFBQXGiEcFxgfGRQUHScdHyIjJSUlFhwpLCgkKyEkJST/2wBDAQYGBgkICREJCREkGBQYJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCT/wAARCAC0ALQDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD6pooooAKKKKACiiigAooooAKQtilrzz4p/FK28FWjWVkUn1eZf3ceeIR/eb/Cs6tWNKLnJ6HXgcDWxtaNChG8n/V35B8UvinbeCrQ2VkUn1iZf3ceciEf3m/wrzb4ZfGe70nUDYeJblrixupNwuGHzQOT3/2a8+07Tta8c+IfIg8y91C8fdJI/IUf3mPYCuk+IXwl1HwNBDeRytf2DqBLMF/1L9wR/d968GeKr1Je3gvdR+s4fIMpwlFZXiZJ1aivfrfpbt5d9dz6khuI54kkidZEcblZTkMPUVIDmvm74SfFuTwxLFoutSvJpTttimblrYn/ANl/lX0bBPHcRpLE6yRuAyupyGHqDXs4bExrx5o7n5rnmR18qr+yqaxez6Nf590S0UUV0nihRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUjcCgtivPfil8VLbwVaGysyk+sTL+7jzkQj+83+FZ1asacXKb0OvA4Gtja0aFCN5P8Aq78hPil8UrbwTaGysis+sTL+7jzkQj+83+FfO+nadrXjnxAIIPMvdRu33PI3OB3Zj2Ao07Tta8c+IPJtxJe6jdvueR+i/wC0x7AV9PfD74eaf4E0oQQAS3koBuLoj5pD6D0WvFiqmOqXekV/X3n6dUqYThXCezp2niJr+n5RXRdfyPh78PtO8CaWIIAJryUA3FyRy59B6AV017Z299bSW1zCksEqlHjYZDCp9tAFe1CnGMeSK0Py/EYutiKzr1ZNyetz5h+Kvwqn8F3L6jpyPNosremTbE/wn29DV34S/FqTwxLHoutTNJpUjYimY5NsT/Nf5V9FXllBfW0ttcxJLBKpV43GQwNfNHxV+FU/gy5fUtNR5tGmPXGTbE/wn/Zrx8Thp4aftqO3b+uh+kZLnWHzrD/2Zmfx9Jd+3pJfj+f01DNHPCksbrJG4DK6nII7EVKOlfNvwm+LUnhiWPRNblaTSnOIpW5NsT/Na+jYLiOeJJInWRHG5WU5DD1Br08NiY143W/Y+IzzI6+VV/Z1NYvZ9Gv8+6JaKQHJpa6TxQooooAKKKKACiiigAooooAKKKKACjpSMcDmvPPil8U7bwVaGysmSfWJl+SPORCP7zf4VnVqxpxcpbHZgcDWxtaNChG8n/V35B8U/ilbeCrRrOyZJ9YmX93HniEf3m/wr5303Tta8c+IPIgEl7qN2+6SR+Qoz95j2Ao03Tta8c+IPIt/NvNQu33SSvzt9Sx7AV71HF4a/Z/8IR6lqKTTGeeOC6vIk3NubufRBXiqNTHVLvSK/r7z9NqVcJwphPZ07TxE1/TfaK6Lr+XR/D74faf4F0vyIAJr2UZuboj5pD6D0Arrx0qk2r2CafHqD3cEdpIiuszuApB6YNW1dXUOrAqRkEdMete3CEYR5Y7H5bisVVxNWVatK8nux1FNVgwyCCD6HNKTVmAHrUF3Z299bS21zEk0EqlHjcZDA1YoNJq44txd09T5g+Kvwqn8GXD6lpqvPo0zemTbE/wt7e9XfhL8WpPDEsei61K0mkucRSk5NsT2/wB3+VfRV5aQ31tLbXMSzQSqVeNhkMK+aPir8Kp/Bdw2o6cjTaLK3pk2xP8AC3t714mJw08NP21Hbqv66H6hkudYfOsP/ZmafH0l37f9vL8fz+mreeO4jSWJ1eN1DI6nIYeoNS182/CT4tS+GJo9F1uZpNJdsRTMcm2J/wDZf5V9GwTJcRJLE6yRuAyupyGB6EV6eGxMa8eaO/Y+IzzI6+VV/ZVNYvZ9Gv8APuiWigdKK6TxQooooAKKKKACiiigApC2DS9K87+KfxStvBVo1nZFJ9XmX93HniEf3mrOrVjTi5yeh14HA1sbWjQoRvJ/1d+QvxT+Klt4LtDZWRSfWJl/dx5yIR/eb/CvnbTdN1nxx4g8iASXmo3b7nkbovqzHsBRpum6z458QeRAJL3Ubt90kjnIAz95j2Ar6e+H/wAPtP8AAulfZ4AJbyUZubkj5pD6D0FeKlUx1S70iv6+8/TqlTCcK4T2dO08RNf032iui6/kfD/4f6d4D0kQw4lu5BuuLphy59B6AVq+KfDlj4v8PX2iagivbX0LRNkA4yOGH0rQv7T7dY3FqXaMTxPFvXquRjI9xXzVceNfiF+zpqK6d4mjm8TeEZHxb3xJ8yME9C3Yj+6a9uEIwioxWh+W4rFVcVVlWrSvJ7s8413xD4htDpfwa1tHYaVrKbZyxzLBnKqfbByK+0NWj2+H76OPKEWciqV6j92cYr4r+N/j3Qdd+JWi+M/DNwtwjRRyyhl2ujKQNrDscV9oWmoQ674aS+tm3RXlmXQ/VKswPK/2cPFqR/B6a+1zUiF0u7uFnuJ3yVQHIyTWp8K/E/iH4leJ9R8YuZLHwokZstKtHGGufm+advywPrXzf8ONF8R+PfEd38NIbhoPDw1KS81HYMblVuhPv2r7d0rTLTR9Pt7CxgSC1toxHFGowFUCgC4DQeeKrSX1rFdRWslxCs8oJjjLgO+OuB3qwKADFQXlnBfW0ttdRJNDKpV42GQwParFIetJoabTutz5h+Kvwpn8GXL6jpyPNo0remTbE/wn296u/CX4tSeGJY9F1uVpNJdsRStybYn+a19FXdnb39tLbXMSTQSqUeNxkMD2r5o+Kvwqn8G3D6lpqPNo0remTbE/wt7e9eJiMPPDS9tR27f10P1DJc6w+dYf+zMz+P7Mu/z6SX4/n9NQXEdxEkkTrIjjcrKchh6g1KDXzb8Jfi1J4Ylj0XWpWk0l2xFKTk2rH/2X+VfRtvMlxGksTpJG6hldTkMD3Br08Nio143jv1R8RnmR18qr+yqaxez6Nf590S0UUV0nihRRRQAUjHAyaCwHWvPPin8VLbwVaGysik+sTL8keciEf3m/wrOrVjTi5z2OvA4Gtja0aFCN5P8Aq78g+KXxTt/BVobKyZJ9YmX93HnIhH95q+d9N03WvHPiAW8HmXmoXb7pJX5C+pb0Ao03Tda8c+IPItxJe6hdPueRui+rMewFfT/w++Hun+BdKEEAEt5KM3FyRzIfQegrxYqpjql3pFf195+nVKmE4Uwns6dp4ia/p+UV0XX8j4e/D7TvAmmfZ7dRLeSgG4uSPmkb0HoBXW4oAxRXt04RhFRitD8txWKq4mrKtWleT3YhNee+KviX8NZtQl8H+INZ02WS4BjltpvmQE9iegatz4g+HNZ8V6C2laPr0mhvM2JrmJcyeX3VfQn1r5p+If7IGr2ET3/hLUm1cjl7a5IEzHuQ3SrMDiP2gPg/Z/DfV7bUNCnNzoWqZaAg7vJb+5nuPSvefgj8UNO074Bf2rrE4SPQle0cseWOPlX6nIFfI+uXfibTLP8A4RnV5L+3t7eYyCyuQQEfplc/0rPGu6kmkNo63kosHl89oAflL4xkigD6U/ZM1Z77xn4w1h0W3spwJpHkIAjLMSBk17t44+MHhLwNos2oX2rW08irmK1gcNJM3ZRivz/sta1mbTE8PWMs32e4mDG3hzmeQnjOOuO1fQ3w3/ZF1OW70zWfF2pQJArLNLpqhmkI6hS3T60AeqfBjRdZ8T3tx8TfFgZNS1NPL060/gsbTsAP7x7mvXhx0pkMKW8axRKERFCqoHAA6CnjigBaKM0ZoADVe8tIL62ltrmJZoJVKvGwyGFTnkUYpNXGm4u6PmH4q/CmfwZcPqOmo02iyt6ZNsT/AAt/s+hq58Jfi1J4Ylj0XWpWk0l2xHMxybYn/wBl/lX0XeWcF9byW1zEksMqlXjYZDA9q+aPir8KpvBty2paajTaNK3pk2xP8J/2fevExOGnhp+2o7f1+B+oZJnWHzrD/wBmZn8f2Zd+2vSS/H8/pmCeO4hSWN1kRwGV1OQQehzUw6V82fCb4tSeGJY9E1uVpNJkbEUrHJtif5rX0dBcRzxJJE6yI43KynIYeoNenhsTGvG637HxGeZHXyqv7OprF7Po1/n3RLRSbvaiuk8U87+KnxSt/Bdq1lYsk+sTL8iZ4hH95v8ACvnjTNM1nx14g8iDzL3ULp90kr8hR/eY9gK2/ih4L1jwrr0s2oTS31vdtuivn/5af7Leh9q6n4EeNtH0K4k0XULeK1nu3zFfH+M/3GPb2r52tOVfEclZ8q/r8+5+y5fhqWU5Q8Xl0fazavf/AIG9o9t+5634A+H+neBNKFvbgS3coBubkj5pG9B6D2rrR0pikEZB/KnjpXvwhGEVGK0PyHFYqriasq1aV5PdhRRRVmAh+hNIef4TXKeLvA1x4nv4bqLxHqemCOPYYrXG1+ep96wv+FRXvfxx4gP5UAZP7TXhvR9Q+F2s6rd6ZDLf2kYaC5KDzIzkfxdce1fBx69a+yPjr8O7nQfhhrF7L4s1m+CAfuJsbH5HBr43xyee1AH1r+yt8FrK30+Dx7rEaXN3MT9ghIysCj+M/wC0e3pX00MD+E18+/BH4cXOtfDTRryPxZrNksisRDDjavsK7v8A4VFe/wDQ8+IP0oA9Hzn+Fqpaxren6Bp8moareQWNrH96adwqj/69eVeLvCEHgvRZdW1Xx54i8qMhEhTBknkJwsaDuSeKk+Hvwpv75YNc8f3l1ql0GMtnpl0cxWKH7odejv65zigDTuPjHJeo83h/wtq2o2kSs73k6G3iIAzlSfvD3re8L/EOz1nwjZ+JNWij0GG7yUjvZgpxnGcmk+JfhyPXfBl5pcmrzaLp2zddTWqfMIVGSqjtnHavHNV8NeBtR+H+nT+HWvtcvtanSwsXvJHz8rDeRGeBhQTwKAPo+C4iuYo5oZFkikUOrryGB6EGpKp6RpyaTptpYREmO2hSFT6hRirlACHrUF3ZwX1rLbXMSTQyqUeNxkMD2NWKRulJq403F3R8w/FX4VT+Dbh9S01Hm0WVuwybYn+Fvb3q58Jfi1J4Xli0XWZWk0mRsRSk5NsT/wCy/wAq9h+JXjXSPCWhS/2lHHdy3KlIrI8+cfcenvXyrbWk+q34trK1LzXMmI4I+ep6D2FfP4lLDVlKi9ex+xZHUnnmVypZnD3VtPvbr6rq9n16n2tFOtxEk0LJJG4DK6nIYHuDRXGeAPBmreG/C9pp97rFx565ZkQBljz/AAgn0or3ITk4puNj8pxOHoU6soQqKSTaTs9fPY6bXtAsPEmmTabqUCz28owVPVT2I9CK+WviF8Pb/wABan5UwabT5STb3Q6Eeh9GFfWx5NZ2vaBYeI9Lm03UoFmt5hggjlT/AHgexFc+Mwca8b/aPY4c4jq5VVs9aT3X6rz/AD/Lx74QfGDJg8O+I7j5/uWl5Ieo7I59fQ17kHGK+SPiF8Pb/wAB6n5Uu6ewlOba6A4b2Powr0b4QfF/Jh8O+IrgBuEtLxz970Rz/I1yYPGShL2FfRo+i4j4cpYml/amV6xerS/Fr9V0Pcwc0U1Tk06vYPzgM0nTk0prmfH2va54f0Jrrw9oL63qDOI47YSbAM/xE+goA4r9p+ZY/g/q4ZlG9kUZOM89vWvgknDH6Y/SvpHxp8K/jz8Vb3ztdS1jt85S1+1COGP0+X1968l0b4P+KdU+ICeCJbCSz1LcTKZVOyOMf8tM919D3oA+kv2bvjP4QXwhpnhS91AafqlvlQlxwknuG6D6GvoGW9gitWupJY1gVC7S7htCgZzn0r44/wCFBfD7R5ZI9U+IUuq3MD7JLLSbXzJQ3ptBJzXp3gn4W65rNiumPe61pXgliGeyv7gvdXoHQc8wp6rQB1vhK2l+JvigeONRU/2JYM0Wg2zjh+zXTD1PQfSvUQAo6/nXG+K/iL4M+FtjBb6tqNvp6pGBDaRDMmwcDCDtXh/jP9s6BElt/COis7EYS7vDgD32d/zoA+hvF3izR/CWkyXusTKsRG1IQu+Sdj/AidWJrk/AHhW/1TVx4z8RWKWEwjMOk6SoG3ToD3YDjzWzyfTivh/xF8S/FXijxBFr2p6zdSX8EnmwMjFVtz/sDotfV37PXx21zx6ItG8QaLezXCghdWt4T5L47SHop9+9AHvYAHSlpBS0AITiuU+IHxB07wLpRuLgiW7lBFvag/NI3qfQUnxA+IGn+BNMa4uCJbuUEW9sD80jep9B718w6nqmteOfEH2i48y91C6fbHEnIUdlUdgK87G432S5IfF+R9lwxwxLMJfWcTpRXy5rdPTuw1TU9a8c6/59x5l5qF0+yOJf4R2VR2Ar6H+FnwrtvBdot9eqk+sTL88mMiEf3V/xpvwt+Flt4LtRfXwSfWJl+eTGRCP7q/416MvAGKjBYLl/e1dZP+vvOjifieOIX1DAaUVo2tL26L+7+Y3Z70U6ivTsfChQaKCM0wMzXtC0/wASabNpuo26z28wwQeq+4PY18tfEL4e3/gHU/Jk3zWErZtroDqPQ+jCvrfbWbr+gWHiTS59N1KBZreYYKnqp7EehFcWMwca8ezPpeHOI6uVVbPWm91+q8/zPHvhB8XyTD4d8RXHzcJaXjnr6I5/ka9xByOK+SviH8Pb/wABan5U26fT5WJtroDgj+6fRhXonwh+L+TD4d8R3Hz/AOrtLyQ9fRHPr6GuTB4yUJewr7n0XEfDlLE0v7UyvWL1aX4tfquh7kWCrk4x71lap4p0PR1zqGr2Vr6+ZMAa87+MHw28c+Pb62/4RvxmNF05Ydk9qQ2JHyfmyPavG7j9jTxhdOZJvF2nTMxyS4kJNewfnB734n+O3gDwvp5u7nxDbXRYfu4LU75JPoK+efHf7XGp6jeSt4R0e10pyojGoToHuWT+76AVL/wxX4rH/MyaQfrG9NP7FfiznHiHSD/wB6APF9D8feIvDviGbxDpuoeRqUzmSScRqdxJyTgjFe/eB/2y5obf7P4w0nz3SPC3dn96Rv8AaU8D8Kxz+xZ4uHI1/SD/AMAakP7FvjAdNc0j8FagDxjx3401Dx74nvtf1J901y5KoTkRJ/Co9MVz2c8GvoY/sX+Mhx/bOkn8Gpp/Yx8Z8/8AE30n8moA+ewa7zwV8V/Fvh82elWPiebR9O3hZGjjXCJnlunJ+tejH9jPxqP+YppR/Ok/4Y28bqc/2lpX60AfT3wz8f6J460Iy6NqVxqCWW2CW4nTa8rAfeIHrU3xA+IGneBNKNxcMJbyUYt7YH5pG9T6CvJvh5pdz+zj4N1ODxDc2l3f3sweztoDy5A6n0Fec6nqeteOtf8AtE5kvNQum2Rxp/COyqOwFedjcb7L3IfF+R9lwxwxLMJfWcTpRj8ua3T07sNT1PWfHHiD7RcGS81C6fbHEnIUdlUdgK+h/hV8LLbwXaC9vVSfV5l+eTGRCP7q/wCNHws+FVt4KtBfXoSbWJl+d8cQj+6v+NeiBcVGCwTh+9q6y/r8To4n4nVdfUMB7tFaNrS9ui/u/mKABRRRXqHwoUUUUAFFFFABTT1p1FAGZr2g6f4j0ubTdSgWa3mGCpHKnswPYivlr4hfDy/8B6n5UoabT5jm3ugOG9Fb0YV9cGszX9BsPEmmzabqVus9vMMMG6r7g9jXFjMGq8br4j6XhziOrlVWz1pvdfqvP8zx74QfF/cYfDviK4+b7lpeSHr6I5/ka9xQgmvkr4h/D2/8Ban5Um+bT5WzbXQHX/Zb0YV6J8H/AIvkmHw74juPmGEtbyQ9fRHP8jXJg8ZKEvYV9GfRcR8OUsVS/tTK9YvVpfi0vzR7pgUbR6UxTkZBp46V7B+cBgUmB6UtFACYHpRgelLQelACbV9BXKeP/Hum+BdLNzckSXcgItrYH5pG9T6D3o+IHj/TvAmlG5uGEt3IMW9sD80jevsK+X9V1TWvHPiD7RcGS81C6fZHEnIUdlUdhXnY3G+y9yHxfkfZcMcMSzB/WcTpRXy5rdF5d3/SNU1TWfHPiD7ROJLzULt9scSchR2VR2Ar6G+FnwstvBdoL29CT6xMvzvjIhH91f8AGl+FXwstvBdqL2+VJtYmX53xkQj+6v8AjXooGKjBYJx/e1fi/L/gnRxPxPGvH6hgNKMdLrS9ui/u/mC9KKKK9Q+FCiiigAooooAKKKKACiiigAPNJilooAzde0Gw8R6ZPpupQLPbTDaVI5B7EehFfLPxD+Hl/wCA9T8mUNPp8pJtrodx/dY9mFfWx61na7oGn+I9Lm03UrdZreYYZT1B/vA9iK4sZg4143+0fS8OcR1cqq2etN7r9V5/mePfCD4wZMHh3xHcfN/q7W8kPX0Rz6+hr3JXBAr5J+IXw8v/AAJqYil3T6fMc210Bw3+y3owr0T4QfF/Jh8O+I7jDfctLx26+iOf5GuTB4yUJewr7n0XEfDlLFUv7UyvWL1aX4tL810PdAc0UxTkj+VPr2D84EJxXKfED4g6d4F0o3FyRLdyAi3tgfmkb1PoKPiB8QNP8CaW1xcMJbuQYt7YH5pG9T6D3r5f1PVNa8c+IPtFx5l5qF0+yOJOQo7Ko7AV52NxvslyQ+L8j7LhjhiWYS+s4nSivlzW6end/wBJdU1TWvHPiD7RceZeahdPsiiTkKOyqOwFfQ3wr+Fdv4LtFvr0JNrEy/O+MiEf3V/xpPhZ8K7bwXaC+vgk+sTL88mMiAf3V/xr0VegqMFguV+1q/F/X4nTxPxPGvH6hgPdorRtaXt0X938wC4paKK9Q+ECiiigAooooAKKKKACiiigAooooAKKKKACg0UHkUAZmvaFYeJNMm03UrdJ7eYYZT1U+oPY18tfEL4e3/gLU/Kk3TafMc210B1/2W9GFfW+Kzte0Gw8R6ZPpupQLPbzDBU9QexHoRXFjMHGvHsz6XhziOrlVWz1pvdfqvP8zx34P/F8kw+HPEdx83CWl456+iOf5GvR/H3xA0/wLpRubgiW7lGLe2B5kb1PoK+dfiJ8Pb/wHqflS7ptPkJNtdDuP7rHswrCefV/E2oW8UktzqF4wWGEMdzY6AD2rzI46rSi6Ul73T+vyPu6vCmXZjXhmNGdqUtZJbP07f3uxY1TVdZ8deIPtE5kvL+6fbFEnIUdlUdgK+h/hV8LLfwXai+vlSfWJl+d8ZEI/ur/AI0fCz4V2/gu0F9ehJ9YmX53xkQj+6v+NeiBcV2YLBcn72rrL+vxPmuJ+J4119QwGlKOja0vbov7v5igYooor1D4QKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAprcDNFFAnsZuvaFp/iLSptO1K3We2lB3Kex7EHsfevN/gb4T0mytb7VUt914t1JbJLIdxRAcAD0ooriqxTxEHbufSYGvUjlOJhGTSvDS+mt7/eeuAYFFFFdp84FFFFABRRRQAUUUUAFFFFABRRRQB//Z", "toxique": "data:image/jpeg;base64,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"};
+const BANQUES = [[{"type": "qcm", "id": "1a", "enonce": "Le Dakin utilisé pour laver une plaie contient l'ion hypochlorite. Demi-équation : ClO^- + 2 H^+ + 2 e^- = Cl^- + H_2O. Quel est l'oxydant de ce couple ?", "choix": ["ClO^-", "Cl^-", "H^+", "H_2O"], "bonne": 0, "pouces": ["Dans une demi-équation, l'oxydant est du même côté que les électrons.", "Les électrons sont à gauche : cherche, à gauche, l'espèce qui contient du chlore."], "expl": "ClO^- est du même côté que les électrons : c'est l'oxydant du couple ClO^-/Cl^-."}, {"type": "qcm", "id": "1b", "enonce": "La Bétadine du bloc opératoire libère du diiode. Demi-équation : I_2 + 2 e^- = 2 I^-. Quel est le réducteur de ce couple ?", "choix": ["I^-", "I_2", "e^-", "il n'y en a pas"], "bonne": 0, "pouces": ["Le réducteur est de l'autre côté des électrons.", "Les électrons sont à gauche, avec I_2 : le réducteur est donc à droite."], "expl": "I^- est du côté opposé aux électrons : c'est le réducteur du couple I_2/I^-."}, {"type": "qcm", "id": "1c", "enonce": "Un oxydant est une espèce chimique capable de…", "choix": ["capter un ou plusieurs électrons", "céder un ou plusieurs électrons", "capter un ou plusieurs ions H^+", "céder un ou plusieurs ions H^+"], "bonne": 0, "pouces": ["Les ions H^+ concernent les acides et les bases, pas l'oxydoréduction.", "Pense à l'astuce : l'Oxydant les Obtient."], "expl": "Un oxydant capte (obtient) des électrons ; un réducteur en cède."}, {"type": "qcm", "id": "1d", "enonce": "Les pansements à l'argent libèrent des ions argent : Ag^+ + e^- = Ag. Quel couple est correctement écrit ?", "choix": ["Ag^+/Ag", "Ag/Ag^+", "Ag^+/e^-", "Ag/e^-"], "bonne": 0, "pouces": ["Un couple s'écrit toujours Ox/Red.", "L'oxydant est du côté de l'électron : c'est Ag^+."], "expl": "Le couple s'écrit Ox/Red : Ag^+/Ag."}, {"type": "qcm", "id": "1e", "enonce": "Dans le couple H_2O_2/H_2O de l'eau oxygénée, de quel type d'espèce s'agit-il pour le peroxyde d'hydrogène H_2O_2 ?", "choix": ["l'oxydant", "le réducteur", "ni l'un ni l'autre", "un acide"], "bonne": 0, "pouces": ["Regarde comment le couple est écrit : Ox/Red.", "H_2O_2 est écrit à gauche du « / »."], "expl": "Dans H_2O_2/H_2O, H_2O_2 est écrit en premier : c'est l'oxydant (H_2O_2 + 2 H^+ + 2 e^- = 2 H_2O)."}, {"type": "qcm", "id": "1f", "enonce": "Les poignées de porte du couloir sont en cuivre : Cu = Cu^{2+} + 2 e^-. Que subit le cuivre Cu ?", "choix": ["une oxydation", "une réduction", "ni l'une ni l'autre", "une neutralisation"], "bonne": 0, "pouces": ["Le cuivre perd-il ou gagne-t-il des électrons ?", "Oxydation = perte d'électrons ; réduction = gain d'électrons."], "expl": "Le cuivre cède 2 électrons : il subit une oxydation (c'est un réducteur)."}, {"type": "qcm", "id": "1g", "enonce": "Quelle particule est échangée entre l'oxydant et le réducteur d'un couple ?", "choix": ["l'électron e^-", "le proton H^+", "l'ion hydroxyde HO^-", "l'atome d'oxygène"], "bonne": 0, "pouces": ["Le proton H^+ est échangé dans les réactions acide-base.", "Regarde la demi-équation Ox + n e^- = Red."], "expl": "En oxydoréduction, la particule échangée est l'électron."}, {"type": "qcm", "id": "1h", "enonce": "Une réduction correspond à…", "choix": ["un gain d'électrons", "une perte d'électrons", "un gain de protons", "une perte de protons"], "bonne": 0, "pouces": ["C'est ce que subit un oxydant.", "Un oxydant capte des électrons."], "expl": "Une réduction est un gain d'électrons : c'est l'oxydant qui est réduit."}, {"type": "qcm", "id": "1i", "enonce": "Un patient anémié prend des comprimés de fer. Demi-équation : Fe^{3+} + e^- = Fe^{2+}. Que représente l'ion Fe^{2+} dans ce couple ?", "choix": ["le réducteur", "l'oxydant", "un électron", "un acide"], "bonne": 0, "pouces": ["Où se trouve l'électron dans la demi-équation ?", "L'électron est avec Fe^{3+} : Fe^{2+} est de l'autre côté."], "expl": "Fe^{2+} est du côté opposé à l'électron : c'est le réducteur du couple Fe^{3+}/Fe^{2+}."}, {"type": "qcm", "id": "1j", "enonce": "En dermatologie, on utilise des bains de permanganate : MnO_4^- + 8 H^+ + 5 e^- = Mn^{2+} + 4 H_2O. Combien d'électrons l'oxydant capte-t-il ?", "choix": ["5", "8", "4", "2"], "bonne": 0, "pouces": ["Cherche le nombre écrit devant e^-.", "8 est le nombre d'ions H^+, pas d'électrons."], "expl": "Le coefficient devant e^- est 5 : l'ion permanganate capte 5 électrons."}, {"type": "qcm", "id": "1k", "enonce": "Le peroxyde d'hydrogène appartient aussi au couple O_2/H_2O_2 : O_2 + 2 H^+ + 2 e^- = H_2O_2. Dans ce couple, H_2O_2 est…", "choix": ["le réducteur", "l'oxydant", "un électron", "un ion"], "bonne": 0, "pouces": ["Les électrons sont à gauche, avec O_2.", "H_2O_2 est donc de l'autre côté des électrons."], "expl": "Dans O_2/H_2O_2, H_2O_2 est le réducteur : c'est pour ça que l'eau oxygénée peut réagir avec elle-même et vieillir."}, {"type": "qcm", "id": "1l", "enonce": "Quand l'oxydant d'un couple capte des électrons, il se transforme en…", "choix": ["son réducteur conjugué", "un autre oxydant", "électrons libres", "eau"], "bonne": 0, "pouces": ["Ox + n e^- = Red : que trouve-t-on à droite ?", "Les deux espèces d'un couple sont dites conjuguées."], "expl": "En captant des électrons, l'oxydant devient le réducteur du même couple (son réducteur conjugué)."}, {"type": "qcm", "id": "1m", "enonce": "Un réducteur est une espèce chimique capable de…", "choix": ["céder un ou plusieurs électrons", "capter un ou plusieurs électrons", "céder un ou plusieurs ions H^+", "capter un ou plusieurs ions HO^-"], "bonne": 0, "pouces": ["Pense à l'astuce : le Réducteur Rend des électrons.", "Les ions H^+ et HO^- concernent les acides et les bases."], "expl": "Un réducteur cède (rend) des électrons."}, {"type": "qcm", "id": "1n", "enonce": "Les ions cuivre libérés par les poignées appartiennent au couple Cu^{2+}/Cu. Quel est l'oxydant de ce couple ?", "choix": ["Cu^{2+}", "Cu", "e^-", "il n'y a pas d'oxydant"], "bonne": 0, "pouces": ["Un couple s'écrit toujours Ox/Red.", "L'espèce écrite avant le « / » est l'oxydant."], "expl": "Dans Cu^{2+}/Cu, l'oxydant est l'ion Cu^{2+} : Cu^{2+} + 2 e^- = Cu."}, {"type": "qcm", "id": "1o", "enonce": "Une oxydation correspond à…", "choix": ["une perte d'électrons", "un gain d'électrons", "une perte de protons H^+", "un gain d'atomes d'oxygène seulement"], "bonne": 0, "pouces": ["C'est ce que subit un réducteur.", "Un réducteur cède des électrons."], "expl": "Une oxydation est une perte d'électrons : c'est le réducteur qui est oxydé."}, {"type": "qcm", "id": "1p", "enonce": "Le dichlore se forme quand on mélange eau de Javel et détartrant. Dans la demi-équation Cl_2 + 2 e^- = 2 Cl^-, le dichlore Cl_2 est…", "choix": ["l'oxydant", "le réducteur", "un ion", "un acide"], "bonne": 0, "pouces": ["Cherche de quel côté sont les électrons.", "L'espèce du même côté que les électrons est l'oxydant."], "expl": "Cl_2 est du côté des électrons : c'est l'oxydant du couple Cl_2/Cl^-."}, {"type": "qcm", "id": "1q", "enonce": "Un ion argent Ag^+ d'un pansement capte un électron arraché à une bactérie : Ag^+ + e^- → Ag. Que subit l'ion Ag^+ ?", "choix": ["une réduction", "une oxydation", "une neutralisation", "une dilution"], "bonne": 0, "pouces": ["L'ion Ag^+ gagne-t-il ou perd-il un électron ?", "Réduction = gain d'électrons."], "expl": "Ag^+ gagne un électron : il subit une réduction (c'est un oxydant)."}, {"type": "qcm", "id": "1r", "enonce": "Dans une demi-équation d'oxydoréduction, où se trouvent les électrons ?", "choix": ["du même côté que l'oxydant", "du même côté que le réducteur", "des deux côtés", "nulle part"], "bonne": 0, "pouces": ["Rappelle-toi l'écriture générale Ox + n e^- = Red.", "L'oxydant capte les électrons : ils sont avec lui."], "expl": "Ox + n e^- = Red : les électrons sont du côté de l'oxydant."}, {"type": "qcm", "id": "1s", "enonce": "La vitamine C est un « antioxydant » : C_6H_6O_6 + 2 H^+ + 2 e^- = C_6H_8O_6. La vitamine C (C_6H_8O_6) est…", "choix": ["un réducteur", "un oxydant", "un acide fort", "un électron"], "bonne": 0, "pouces": ["Où se trouve C_6H_8O_6 par rapport aux électrons ?", "Un antioxydant protège les cellules en cédant ses électrons aux oxydants."], "expl": "C_6H_8O_6 est du côté opposé aux électrons : c'est un réducteur."}, {"type": "qcm", "id": "1t", "enonce": "L'alcool à 70° est un antiseptique, mais ce n'est pas un oxydant. Comment agit-il sur les micro-organismes ?", "choix": ["il dénature leurs protéines et dissout les lipides de leur membrane", "il arrache des électrons à leurs molécules", "il les neutralise comme une base", "il les dilue"], "bonne": 0, "pouces": ["Le test avec l'iodure de potassium ne donne rien avec l'alcool.", "L'alcool modifie la forme des protéines, comme la cuisson d'un blanc d'œuf."], "expl": "L'alcool dénature les protéines et dissout les lipides membranaires : il n'agit pas par oxydation."}], [{"type": "eq", "id": "2a", "enonce": "Test de l'eau oxygénée : en milieu acide (H^+_{(aq)}), le peroxyde d'hydrogène H_2O_2_{(aq)} oxyde les ions iodure d'une solution d'iodure de potassium (K^+_{(aq)} + I^-_{(aq)}) ; il se forme du diiode I_2_{(aq)} et de l'eau H_2O_{(l)}.", "demis": [{"g": [["H_2O_2", 1], ["H^+", 2], ["e^-", 2]], "d": [["H_2O", 2]]}, {"g": [["I_2", 1], ["e^-", 2]], "d": [["I^-", 2]]}], "g": [["H_2O_2", 1], ["H^+", 2], ["I^-", 2]], "d": [["H_2O", 2], ["I_2", 1]], "pouces": ["Les deux demi-équations échangent déjà 2 électrons : laisse les multiplicateurs sur × 1.", "Écris la demi-équation du diiode à l'envers : 2 I^- → I_2 + 2 e^-, puis additionne."], "expl": "H_2O_2 + 2 H^+ + 2 I^- → 2 H_2O + I_2."}, {"type": "eq", "id": "2b", "enonce": "La poignée en cuivre Cu_{(s)} réagit avec le dioxygène dissous O_2_{(aq)} en présence de la sueur, qui apporte des ions H^+_{(aq)} ; il se forme des ions cuivre Cu^{2+}_{(aq)} et de l'eau H_2O_{(l)}.", "demis": [{"g": [["Cu^{2+}", 1], ["e^-", 2]], "d": [["Cu", 1]]}, {"g": [["O_2", 1], ["H^+", 4], ["e^-", 4]], "d": [["H_2O", 2]]}], "g": [["Cu", 2], ["O_2", 1], ["H^+", 4]], "d": [["Cu^{2+}", 2], ["H_2O", 2]], "pouces": ["La première demi-équation échange 2 électrons, la seconde 4 : choisis les multiplicateurs pour avoir le même nombre d'électrons dans les deux.", "Multiplie la demi-équation du cuivre par 2 pour avoir 4 électrons."], "expl": "(Cu → Cu^{2+} + 2 e^-) × 2 : 2 Cu + O_2 + 4 H^+ → 2 Cu^{2+} + 2 H_2O."}, {"type": "eq", "id": "2c", "enonce": "Une agente a mélangé de l'eau de Javel (Na^+_{(aq)} + ClO^-_{(aq)} + Cl^-_{(aq)}) et un détartrant à l'acide chlorhydrique (H^+_{(aq)} + Cl^-_{(aq)}) : les ions hypochlorite réagissent avec les ions chlorure et il se dégage du dichlore Cl_2_{(g)}.", "demis": [{"g": [["ClO^-", 2], ["H^+", 4], ["e^-", 2]], "d": [["Cl_2", 1], ["H_2O", 2]]}, {"g": [["Cl_2", 1], ["e^-", 2]], "d": [["Cl^-", 2]]}], "g": [["ClO^-", 1], ["Cl^-", 1], ["H^+", 2]], "d": [["Cl_2", 1], ["H_2O", 1]], "pouces": ["Les deux demi-équations échangent déjà 2 électrons : laisse les multiplicateurs sur × 1.", "Après l'addition, Cl_2 apparaît deux fois à droite et tous les nombres sont pairs : simplifie par 2."], "expl": "2 ClO^- + 2 Cl^- + 4 H^+ → 2 Cl_2 + 2 H_2O, puis on divise par 2 : ClO^- + Cl^- + 2 H^+ → Cl_2 + H_2O."}, {"type": "eq", "id": "2d", "enonce": "Le vieux flacon d'eau oxygénée du chariot de soins s'est décomposé : le peroxyde d'hydrogène H_2O_2_{(aq)} réagit avec lui-même et se transforme en eau H_2O_{(l)} et en dioxygène O_2_{(g)}.", "demis": [{"g": [["H_2O_2", 1], ["H^+", 2], ["e^-", 2]], "d": [["H_2O", 2]]}, {"g": [["O_2", 1], ["H^+", 2], ["e^-", 2]], "d": [["H_2O_2", 1]]}], "g": [["H_2O_2", 2]], "d": [["H_2O", 2], ["O_2", 1]], "pouces": ["Les deux demi-équations échangent déjà 2 électrons : laisse les multiplicateurs sur × 1.", "Écris la seconde demi-équation à l'envers ; après l'addition, les ions H^+ se simplifient."], "expl": "H_2O_2 + 2 H^+ + 2 e^- → 2 H_2O et H_2O_2 → O_2 + 2 H^+ + 2 e^- : 2 H_2O_2 → 2 H_2O + O_2."}, {"type": "eq", "id": "2e", "enonce": "Au laboratoire, un fil de cuivre Cu_{(s)} plongé dans une solution de nitrate d'argent (Ag^+_{(aq)} + NO_3^-_{(aq)}) se couvre d'argent Ag_{(s)} et la solution bleuit (ions Cu^{2+}_{(aq)}) : c'est l'« arbre de Diane ».", "demis": [{"g": [["Ag^+", 1], ["e^-", 1]], "d": [["Ag", 1]]}, {"g": [["Cu^{2+}", 1], ["e^-", 2]], "d": [["Cu", 1]]}], "g": [["Ag^+", 2], ["Cu", 1]], "d": [["Ag", 2], ["Cu^{2+}", 1]], "pouces": ["La première demi-équation échange 1 électron, la seconde 2 : choisis les multiplicateurs pour avoir le même nombre d'électrons dans les deux.", "Multiplie la demi-équation de l'argent par 2."], "expl": "(Ag^+ + e^- → Ag) × 2 : 2 Ag^+ + Cu → 2 Ag + Cu^{2+}."}, {"type": "eq", "id": "2f", "enonce": "Le laboratoire contrôle un médicament contenant des ions fer(II) Fe^{2+}_{(aq)} avec une solution acidifiée de permanganate de potassium (K^+_{(aq)} + MnO_4^-_{(aq)}) ; il se forme des ions Mn^{2+}_{(aq)} et Fe^{3+}_{(aq)}.", "demis": [{"g": [["MnO_4^-", 1], ["H^+", 8], ["e^-", 5]], "d": [["Mn^{2+}", 1], ["H_2O", 4]]}, {"g": [["Fe^{3+}", 1], ["e^-", 1]], "d": [["Fe^{2+}", 1]]}], "g": [["MnO_4^-", 1], ["H^+", 8], ["Fe^{2+}", 5]], "d": [["Mn^{2+}", 1], ["Fe^{3+}", 5], ["H_2O", 4]], "pouces": ["La première demi-équation échange 5 électrons, la seconde 1 : choisis les multiplicateurs pour avoir le même nombre d'électrons dans les deux.", "Multiplie la demi-équation du fer par 5."], "expl": "(Fe^{2+} → Fe^{3+} + e^-) × 5 : MnO_4^- + 8 H^+ + 5 Fe^{2+} → Mn^{2+} + 5 Fe^{3+} + 4 H_2O."}, {"type": "eq", "id": "2g", "enonce": "Une tache de Bétadine (diiode I_2_{(aq)}) disparaît quand on la tamponne avec de la vitamine C, l'acide ascorbique C_6H_8O_6_{(aq)} ; il se forme des ions iodure I^-_{(aq)}.", "demis": [{"g": [["I_2", 1], ["e^-", 2]], "d": [["I^-", 2]]}, {"g": [["C_6H_6O_6", 1], ["H^+", 2], ["e^-", 2]], "d": [["C_6H_8O_6", 1]]}], "g": [["I_2", 1], ["C_6H_8O_6", 1]], "d": [["I^-", 2], ["C_6H_6O_6", 1], ["H^+", 2]], "pouces": ["Les deux demi-équations échangent déjà 2 électrons : laisse les multiplicateurs sur × 1.", "La vitamine C est le réducteur : écris sa demi-équation à l'envers."], "expl": "I_2 + C_6H_8O_6 → 2 I^- + C_6H_6O_6 + 2 H^+."}, {"type": "eq", "id": "2h", "enonce": "Test de l'eau de Javel (Na^+_{(aq)} + ClO^-_{(aq)}), en milieu basique, avec une solution d'iodure de potassium (K^+_{(aq)} + I^-_{(aq)}) ; il se forme du diiode I_2_{(aq)}.", "demis": [{"g": [["ClO^-", 1], ["H_2O", 1], ["e^-", 2]], "d": [["Cl^-", 1], ["HO^-", 2]]}, {"g": [["I_2", 1], ["e^-", 2]], "d": [["I^-", 2]]}], "g": [["ClO^-", 1], ["I^-", 2], ["H_2O", 1]], "d": [["Cl^-", 1], ["I_2", 1], ["HO^-", 2]], "pouces": ["Les deux demi-équations échangent déjà 2 électrons : laisse les multiplicateurs sur × 1.", "Écris la demi-équation du diiode à l'envers, puis additionne."], "expl": "ClO^- + 2 I^- + H_2O → Cl^- + I_2 + 2 HO^-."}, {"type": "eq", "id": "2i", "enonce": "Au laboratoire, en milieu acide (H^+_{(aq)}), les ions hypochlorite ClO^-_{(aq)} du Dakin oxydent les ions fer(II) d'une solution de sulfate de fer (Fe^{2+}_{(aq)} + SO_4^{2-}_{(aq)}).", "demis": [{"g": [["ClO^-", 1], ["H^+", 2], ["e^-", 2]], "d": [["Cl^-", 1], ["H_2O", 1]]}, {"g": [["Fe^{3+}", 1], ["e^-", 1]], "d": [["Fe^{2+}", 1]]}], "g": [["ClO^-", 1], ["H^+", 2], ["Fe^{2+}", 2]], "d": [["Cl^-", 1], ["Fe^{3+}", 2], ["H_2O", 1]], "pouces": ["La première demi-équation échange 2 électrons, la seconde 1 : choisis les multiplicateurs pour avoir le même nombre d'électrons dans les deux.", "Multiplie la demi-équation du fer par 2."], "expl": "(Fe^{2+} → Fe^{3+} + e^-) × 2 : ClO^- + 2 H^+ + 2 Fe^{2+} → Cl^- + 2 Fe^{3+} + H_2O."}, {"type": "eq", "id": "2j", "enonce": "L'eau oxygénée H_2O_2_{(aq)} oxyde, elle aussi, les ions fer(II) d'une solution acidifiée de sulfate de fer (Fe^{2+}_{(aq)} + SO_4^{2-}_{(aq)}).", "demis": [{"g": [["H_2O_2", 1], ["H^+", 2], ["e^-", 2]], "d": [["H_2O", 2]]}, {"g": [["Fe^{3+}", 1], ["e^-", 1]], "d": [["Fe^{2+}", 1]]}], "g": [["H_2O_2", 1], ["H^+", 2], ["Fe^{2+}", 2]], "d": [["H_2O", 2], ["Fe^{3+}", 2]], "pouces": ["La première demi-équation échange 2 électrons, la seconde 1 : choisis les multiplicateurs pour avoir le même nombre d'électrons dans les deux.", "Multiplie la demi-équation du fer par 2."], "expl": "H_2O_2 + 2 H^+ + 2 Fe^{2+} → 2 H_2O + 2 Fe^{3+}."}, {"type": "eq", "id": "2k", "enonce": "Une solution de chlorure de fer(III) (Fe^{3+}_{(aq)} + 3 Cl^-_{(aq)}) oxyde les ions iodure d'une solution d'iodure de potassium (K^+_{(aq)} + I^-_{(aq)}) : la solution brunit car il se forme du diiode I_2_{(aq)}.", "demis": [{"g": [["Fe^{3+}", 1], ["e^-", 1]], "d": [["Fe^{2+}", 1]]}, {"g": [["I_2", 1], ["e^-", 2]], "d": [["I^-", 2]]}], "g": [["Fe^{3+}", 2], ["I^-", 2]], "d": [["Fe^{2+}", 2], ["I_2", 1]], "pouces": ["La première demi-équation échange 1 électron, la seconde 2 : choisis les multiplicateurs pour avoir le même nombre d'électrons dans les deux.", "Multiplie la demi-équation du fer par 2 et écris celle du diiode à l'envers."], "expl": "2 Fe^{3+} + 2 I^- → 2 Fe^{2+} + I_2."}, {"type": "eq", "id": "2l", "enonce": "Sous la hotte, on verse de l'eau de Javel (Na^+_{(aq)} + ClO^-_{(aq)}) acidifiée (H^+_{(aq)}) sur de la tournure de cuivre Cu_{(s)} ; il se forme des ions cuivre Cu^{2+}_{(aq)} et des ions chlorure Cl^-_{(aq)}.", "demis": [{"g": [["ClO^-", 1], ["H^+", 2], ["e^-", 2]], "d": [["Cl^-", 1], ["H_2O", 1]]}, {"g": [["Cu^{2+}", 1], ["e^-", 2]], "d": [["Cu", 1]]}], "g": [["Cu", 1], ["ClO^-", 1], ["H^+", 2]], "d": [["Cu^{2+}", 1], ["Cl^-", 1], ["H_2O", 1]], "pouces": ["Les deux demi-équations échangent déjà 2 électrons : laisse les multiplicateurs sur × 1.", "Écris la demi-équation du cuivre à l'envers, puis additionne."], "expl": "Cu + ClO^- + 2 H^+ → Cu^{2+} + Cl^- + H_2O."}, {"type": "eq", "id": "2m", "enonce": "Le dichlore Cl_2_{(g)} est détecté avec un papier imbibé d'une solution d'iodure de potassium (K^+_{(aq)} + I^-_{(aq)}) : il se forme du diiode I_2_{(aq)}.", "demis": [{"g": [["Cl_2", 1], ["e^-", 2]], "d": [["Cl^-", 2]]}, {"g": [["I_2", 1], ["e^-", 2]], "d": [["I^-", 2]]}], "g": [["Cl_2", 1], ["I^-", 2]], "d": [["Cl^-", 2], ["I_2", 1]], "pouces": ["Les deux demi-équations échangent déjà 2 électrons : laisse les multiplicateurs sur × 1.", "Le dichlore est l'oxydant ; les ions iodure sont le réducteur."], "expl": "Cl_2 + 2 I^- → 2 Cl^- + I_2."}, {"type": "eq", "id": "2n", "enonce": "Pour aller plus loin. Le laboratoire dose une eau oxygénée H_2O_2_{(aq)} avec une solution acidifiée de permanganate de potassium (K^+_{(aq)} + MnO_4^-_{(aq)}) : il se dégage du dioxygène O_2_{(g)}.", "demis": [{"g": [["MnO_4^-", 1], ["H^+", 8], ["e^-", 5]], "d": [["Mn^{2+}", 1], ["H_2O", 4]]}, {"g": [["O_2", 1], ["H^+", 2], ["e^-", 2]], "d": [["H_2O_2", 1]]}], "g": [["MnO_4^-", 2], ["H_2O_2", 5], ["H^+", 6]], "d": [["Mn^{2+}", 2], ["O_2", 5], ["H_2O", 8]], "pouces": ["La première demi-équation échange 5 électrons, la seconde 2 : choisis les multiplicateurs pour avoir le même nombre d'électrons dans les deux.", "Il faut 10 électrons : × 2 pour le permanganate, × 5 pour H_2O_2. Après l'addition, simplifie les H^+ des deux côtés."], "expl": "2 MnO_4^- + 16 H^+ + 5 H_2O_2 → 2 Mn^{2+} + 8 H_2O + 5 O_2 + 10 H^+, soit 2 MnO_4^- + 5 H_2O_2 + 6 H^+ → 2 Mn^{2+} + 5 O_2 + 8 H_2O."}, {"type": "eq", "id": "2o", "enonce": "Alcootest chimique (1). En milieu acide, les ions dichromate (orange) d'une solution de dichromate de potassium (2 K^+_{(aq)} + Cr_2O_7^{2-}_{(aq)}) oxydent l'éthanol C_2H_6O_{(aq)} de l'haleine en éthanal C_2H_4O_{(aq)} ; il se forme des ions Cr^{3+}_{(aq)} (verts).", "demis": [{"g": [["Cr_2O_7^{2-}", 1], ["H^+", 14], ["e^-", 6]], "d": [["Cr^{3+}", 2], ["H_2O", 7]]}, {"g": [["C_2H_4O", 1], ["H^+", 2], ["e^-", 2]], "d": [["C_2H_6O", 1]]}], "g": [["Cr_2O_7^{2-}", 1], ["C_2H_6O", 3], ["H^+", 8]], "d": [["Cr^{3+}", 2], ["C_2H_4O", 3], ["H_2O", 7]], "pouces": ["La première demi-équation échange 6 électrons, la seconde 2 : choisis les multiplicateurs pour avoir le même nombre d'électrons dans les deux.", "× 3 pour l'éthanol (6 électrons). Après l'addition, il y a des ions H^+ des deux côtés : 14 − 6 = 8."], "expl": "Cr_2O_7^{2-} + 14 H^+ + 3 C_2H_6O → 2 Cr^{3+} + 7 H_2O + 3 C_2H_4O + 6 H^+, soit Cr_2O_7^{2-} + 3 C_2H_6O + 8 H^+ → 2 Cr^{3+} + 3 C_2H_4O + 7 H_2O. Le passage de l'orange au vert révèle l'alcool."}, {"type": "eq", "id": "2p", "enonce": "Alcootest chimique (2). Avec plus de temps, les ions dichromate (2 K^+_{(aq)} + Cr_2O_7^{2-}_{(aq)}) oxydent l'éthanol C_2H_6O_{(aq)} jusqu'à l'acide éthanoïque C_2H_4O_2_{(aq)} ; il se forme des ions Cr^{3+}_{(aq)}.", "demis": [{"g": [["Cr_2O_7^{2-}", 1], ["H^+", 14], ["e^-", 6]], "d": [["Cr^{3+}", 2], ["H_2O", 7]]}, {"g": [["C_2H_4O_2", 1], ["H^+", 4], ["e^-", 4]], "d": [["C_2H_6O", 1], ["H_2O", 1]]}], "g": [["Cr_2O_7^{2-}", 2], ["C_2H_6O", 3], ["H^+", 16]], "d": [["Cr^{3+}", 4], ["C_2H_4O_2", 3], ["H_2O", 11]], "pouces": ["La première demi-équation échange 6 électrons, la seconde 4 : choisis les multiplicateurs pour avoir le même nombre d'électrons dans les deux.", "Il faut 12 électrons : × 2 pour le dichromate, × 3 pour l'éthanol. Simplifie ensuite les H^+ et H_2O présents des deux côtés."], "expl": "2 Cr_2O_7^{2-} + 28 H^+ + 3 C_2H_6O + 3 H_2O → 4 Cr^{3+} + 14 H_2O + 3 C_2H_4O_2 + 12 H^+, soit 2 Cr_2O_7^{2-} + 3 C_2H_6O + 16 H^+ → 4 Cr^{3+} + 3 C_2H_4O_2 + 11 H_2O."}, {"type": "eq", "id": "2q", "enonce": "Un vieux plateau en fer Fe_{(s)} est plongé dans une solution de sulfate de cuivre (Cu^{2+}_{(aq)} + SO_4^{2-}_{(aq)}), utilisée comme antifongique : il se couvre de cuivre Cu_{(s)} et il se forme des ions fer(II) Fe^{2+}_{(aq)}.", "demis": [{"g": [["Cu^{2+}", 1], ["e^-", 2]], "d": [["Cu", 1]]}, {"g": [["Fe^{2+}", 1], ["e^-", 2]], "d": [["Fe", 1]]}], "g": [["Fe", 1], ["Cu^{2+}", 1]], "d": [["Fe^{2+}", 1], ["Cu", 1]], "pouces": ["Les deux demi-équations échangent déjà 2 électrons : laisse les multiplicateurs sur × 1.", "Le fer est le réducteur : écris sa demi-équation à l'envers. Pense à écrire 1 quand il n'y a qu'une seule entité."], "expl": "Fe + Cu^{2+} → Fe^{2+} + Cu."}, {"type": "eq", "id": "2r", "enonce": "Les ions fer(II) Fe^{2+}_{(aq)} d'un comprimé dissous dans l'eau et laissé à l'air sont oxydés par le dioxygène dissous O_2_{(aq)}, en milieu acide (H^+_{(aq)}) ; il se forme des ions fer(III) Fe^{3+}_{(aq)}.", "demis": [{"g": [["O_2", 1], ["H^+", 4], ["e^-", 4]], "d": [["H_2O", 2]]}, {"g": [["Fe^{3+}", 1], ["e^-", 1]], "d": [["Fe^{2+}", 1]]}], "g": [["Fe^{2+}", 4], ["O_2", 1], ["H^+", 4]], "d": [["Fe^{3+}", 4], ["H_2O", 2]], "pouces": ["La première demi-équation échange 4 électrons, la seconde 1 : choisis les multiplicateurs pour avoir le même nombre d'électrons dans les deux.", "Le dioxygène capte 4 électrons : multiplie la demi-équation du fer par 4."], "expl": "(Fe^{2+} → Fe^{3+} + e^-) × 4 : 4 Fe^{2+} + O_2 + 4 H^+ → 4 Fe^{3+} + 2 H_2O."}, {"type": "eq", "id": "2s", "enonce": "La vitamine C (C_6H_8O_6_{(aq)}) d'un jus d'orange laissé à l'air est détruite par le dioxygène dissous O_2_{(aq)} ; il se forme C_6H_6O_6_{(aq)} et de l'eau H_2O_{(l)}.", "demis": [{"g": [["O_2", 1], ["H^+", 4], ["e^-", 4]], "d": [["H_2O", 2]]}, {"g": [["C_6H_6O_6", 1], ["H^+", 2], ["e^-", 2]], "d": [["C_6H_8O_6", 1]]}], "g": [["C_6H_8O_6", 2], ["O_2", 1]], "d": [["C_6H_6O_6", 2], ["H_2O", 2]], "pouces": ["La première demi-équation échange 4 électrons, la seconde 2 : choisis les multiplicateurs pour avoir le même nombre d'électrons dans les deux.", "× 2 pour la vitamine C. Après l'addition, les 4 ions H^+ sont des deux côtés : ils disparaissent."], "expl": "2 C_6H_8O_6 + O_2 + 4 H^+ → 2 C_6H_6O_6 + 4 H^+ + 2 H_2O, soit 2 C_6H_8O_6 + O_2 → 2 C_6H_6O_6 + 2 H_2O."}, {"type": "eq", "id": "2t", "enonce": "Au laboratoire, une solution acidifiée de permanganate de potassium (K^+_{(aq)} + MnO_4^-_{(aq)}) oxyde les ions iodure d'une solution d'iodure de potassium (K^+_{(aq)} + I^-_{(aq)}) : il se forme du diiode I_2_{(aq)} et des ions Mn^{2+}_{(aq)}.", "demis": [{"g": [["MnO_4^-", 1], ["H^+", 8], ["e^-", 5]], "d": [["Mn^{2+}", 1], ["H_2O", 4]]}, {"g": [["I_2", 1], ["e^-", 2]], "d": [["I^-", 2]]}], "g": [["MnO_4^-", 2], ["H^+", 16], ["I^-", 10]], "d": [["Mn^{2+}", 2], ["H_2O", 8], ["I_2", 5]], "pouces": ["La première demi-équation échange 5 électrons, la seconde 2 : choisis les multiplicateurs pour avoir le même nombre d'électrons dans les deux.", "Il faut 10 électrons : × 2 pour le permanganate, × 5 pour le diiode."], "expl": "2 MnO_4^- + 16 H^+ + 10 I^- → 2 Mn^{2+} + 8 H_2O + 5 I_2."}], [{"type": "qcm", "id": "3a", "enonce": "Une agente verse de l'eau de Javel puis un détartrant acide dans des WC. Une odeur piquante se dégage. Quel gaz toxique s'est formé ?", "choix": ["le dichlore Cl_2", "le dioxygène O_2", "le dihydrogène H_2", "la vapeur d'eau H_2O"], "bonne": 0, "pouces": ["Le gaz contient l'élément chlore de l'eau de Javel.", "ClO^- + Cl^- + 2 H^+ → ? + H_2O"], "expl": "Il se forme du dichlore Cl_2, gaz jaune-vert très toxique pour les voies respiratoires."}, {"type": "picto", "id": "3b", "enonce": "Quel pictogramme trouve-t-on sur le gel hydroalcoolique pour signaler qu'il prend feu facilement ?", "choix": ["inflammable", "corrosif", "comburant", "environnement"], "bonne": 0, "pouces": ["Le gel contient beaucoup d'alcool.", "Cherche le pictogramme avec une flamme seule."], "expl": "Le gel hydroalcoolique est inflammable : il faut le tenir loin des flammes."}, {"type": "picto", "id": "3c", "enonce": "Le berlingot d'eau de Javel concentrée peut brûler la peau et les yeux. Quel pictogramme porte-t-il ?", "choix": ["corrosif", "inflammable", "comburant", "toxique"], "bonne": 0, "pouces": ["Pense à un liquide qui « ronge » la main et le métal.", "C'est le pictogramme avec des gouttes qui attaquent une main."], "expl": "Corrosif : il brûle la peau et les yeux et attaque les métaux."}, {"type": "qcm", "id": "3d", "enonce": "Une patiente reçoit une projection d'eau de Javel dans l'œil. Quel est le premier geste ?", "choix": ["rincer abondamment à l'eau pendant au moins 15 minutes", "neutraliser avec quelques gouttes de vinaigre", "essuyer avec une compresse sèche", "attendre l'arrivée du médecin"], "bonne": 0, "pouces": ["On ne mélange jamais l'eau de Javel avec un acide.", "Il faut agir tout de suite pour diluer le produit."], "expl": "On rince immédiatement et abondamment à l'eau, au moins 15 minutes."}, {"type": "qcm", "id": "3e", "enonce": "Où ranger le flacon d'eau oxygénée du chariot de soins ?", "choix": ["dans un flacon opaque, bien fermé, au frais", "dans un flacon transparent près de la fenêtre", "sur le radiateur pour qu'il reste tiède", "ouvert, pour éviter la surpression"], "bonne": 0, "pouces": ["La lumière et la chaleur accélèrent la décomposition de H_2O_2.", "Il faut protéger le produit de la lumière et de la chaleur."], "expl": "Lumière et chaleur accélèrent la décomposition : flacon opaque, fermé, au frais."}, {"type": "qcm", "id": "3f", "enonce": "Une vieille eau oxygénée ne mousse presque plus sur une plaie. Pourquoi ?", "choix": ["le peroxyde d'hydrogène s'est décomposé en eau et en dioxygène", "elle est devenue trop concentrée", "elle s'est transformée en eau de Javel", "la plaie est déjà désinfectée"], "bonne": 0, "pouces": ["La mousse est due à un gaz libéré par H_2O_2.", "2 H_2O_2 → 2 H_2O + O_2 : que reste-t-il dans un vieux flacon ?"], "expl": "H_2O_2 s'est décomposé au fil du temps : il ne reste presque que de l'eau, qui n'est plus antiseptique."}, {"type": "qcm", "id": "3g", "enonce": "Pour préparer la solution désinfectante, on dilue l'eau de Javel dans de l'eau…", "choix": ["froide", "chaude", "bouillante", "vinaigrée"], "bonne": 0, "pouces": ["La chaleur accélère la décomposition des ions hypochlorite.", "Le vinaigre est un acide : danger !"], "expl": "Eau froide : la chaleur décompose les ions hypochlorite, et un acide libérerait du dichlore."}, {"type": "qcm", "id": "3h", "enonce": "Que signifie la mention EUH031 sur l'étiquette de l'eau de Javel ?", "choix": ["Au contact d'un acide, dégage un gaz toxique", "Peut provoquer un incendie", "Toxique pour les poissons", "Ne pas mettre au réfrigérateur"], "bonne": 0, "pouces": ["C'est le danger étudié dans ce chapitre.", "Pense au mélange eau de Javel + détartrant."], "expl": "EUH031 : au contact d'un acide, dégage un gaz toxique (le dichlore)."}, {"type": "qcm", "id": "3i", "enonce": "Un enfant en visite a avalé du produit désinfectant. Que faire ?", "choix": ["ne pas le faire vomir et appeler le centre antipoison ou le 15", "le faire vomir rapidement", "lui faire boire du lait", "lui donner de l'eau vinaigrée"], "bonne": 0, "pouces": ["Faire vomir ferait repasser un produit corrosif dans l'œsophage.", "Il faut un avis médical, avec l'emballage du produit."], "expl": "Ne pas faire vomir, ne pas faire boire, appeler le centre antipoison ou le 15 avec l'emballage."}, {"type": "qcm", "id": "3j", "enonce": "Une personne a respiré du dichlore et tousse. Que doit-elle faire ?", "choix": ["quitter la pièce, se reposer à l'air frais et aérer", "rester dans la pièce et boire de l'eau", "verser de l'eau de Javel pour neutraliser le gaz", "fermer les fenêtres"], "bonne": 0, "pouces": ["Il faut s'éloigner du gaz.", "Le gaz doit être évacué de la pièce."], "expl": "On quitte la pièce, on aère, on se repose à l'air frais ; on appelle le 15 si la gêne persiste."}, {"type": "picto", "id": "3k", "enonce": "Quel pictogramme indique que l'eau de Javel est dangereuse pour les poissons et les milieux aquatiques ?", "choix": ["environnement", "nocif", "corrosif", "comburant"], "bonne": 0, "pouces": ["Cherche un arbre et un poisson.", "Ce danger concerne la nature, pas directement l'être humain."], "expl": "Pictogramme « danger pour l'environnement » : ne pas jeter le produit pur dans la nature."}, {"type": "qcm", "id": "3l", "enonce": "Pour manipuler de l'eau oxygénée à 110 volumes (corrosive), on porte…", "choix": ["des gants, des lunettes et une blouse", "seulement un masque", "rien, c'est un antiseptique", "des gants seulement"], "bonne": 0, "pouces": ["Un produit corrosif attaque la peau et les yeux.", "Il faut protéger les mains, les yeux et les vêtements."], "expl": "Gants, lunettes et blouse protègent la peau, les yeux et les vêtements."}, {"type": "qcm", "id": "3m", "enonce": "Avec quel produit ne faut-il jamais mélanger l'eau de Javel ?", "choix": ["un détartrant ou du vinaigre", "de l'eau froide", "de l'eau du robinet", "aucun, on peut tout mélanger"], "bonne": 0, "pouces": ["Le danger vient des produits acides.", "Les détartrants et le vinaigre sont acides."], "expl": "Javel + produit acide → dichlore toxique. On ne mélange jamais l'eau de Javel avec un autre produit."}, {"type": "picto", "id": "3n", "enonce": "Le permanganate de potassium solide peut provoquer ou aggraver un incendie. Quel pictogramme porte-t-il ?", "choix": ["comburant", "inflammable", "corrosif", "environnement"], "bonne": 0, "pouces": ["Il ne brûle pas lui-même, mais il aide le feu.", "Cherche la flamme au-dessus d'un cercle."], "expl": "Comburant : il peut provoquer ou aggraver un incendie."}, {"type": "qcm", "id": "3o", "enonce": "Pourquoi les berlingots d'eau de Javel portent-ils une date à respecter ?", "choix": ["les ions hypochlorite se décomposent avec le temps : le produit perd son efficacité", "le produit devient inflammable", "le berlingot fond", "c'est seulement une obligation commerciale"], "bonne": 0, "pouces": ["Comme l'eau oxygénée, l'eau de Javel vieillit.", "Que devient l'espèce active au fil des mois ?"], "expl": "Les ions hypochlorite se décomposent : une Javel trop vieille désinfecte moins bien."}, {"type": "qcm", "id": "3p", "enonce": "Un agent transvase de l'eau de Javel diluée dans une bouteille d'eau minérale vide. Pourquoi est-ce dangereux ?", "choix": ["quelqu'un risque de la boire par erreur", "la bouteille va exploser", "l'eau de Javel devient acide", "le plastique devient toxique"], "bonne": 0, "pouces": ["Une bouteille d'eau minérale fait penser à… de l'eau.", "Pense aux enfants et aux personnes âgées."], "expl": "Risque d'ingestion accidentelle : on garde toujours un produit dans son emballage d'origine."}, {"type": "picto", "id": "3q", "enonce": "L'eau de Javel à 2,6 % irrite la peau et les yeux. Quel pictogramme indique ce danger ?", "choix": ["nocif", "toxique", "comburant", "inflammable"], "bonne": 0, "pouces": ["C'est un danger moins grave que « corrosif ».", "Cherche le point d'exclamation."], "expl": "Le pictogramme « nocif / irritant » (point d'exclamation) signale une irritation de la peau et des yeux."}, {"type": "qcm", "id": "3r", "enonce": "Pourquoi faut-il aérer la pièce quand on utilise de l'eau de Javel ?", "choix": ["pour évacuer les gaz irritants qui peuvent se dégager", "pour que le produit sèche plus vite", "pour diluer le produit", "ce n'est pas nécessaire"], "bonne": 0, "pouces": ["L'odeur de la Javel vient de gaz qu'on respire.", "En cas de mélange accidentel, il peut se former du dichlore."], "expl": "On aère pour évacuer les gaz irritants (et le dichlore en cas de mélange accidentel)."}, {"type": "qcm", "id": "3s", "enonce": "Lors d'une projection de produit sur la peau, que fait-on des vêtements imbibés ?", "choix": ["on les retire, puis on rince la peau à l'eau", "on les garde pour ne pas avoir froid", "on les sèche avec un sèche-cheveux", "on les frotte contre la peau"], "bonne": 0, "pouces": ["Le produit reste au contact de la peau à travers le tissu.", "Il faut supprimer le contact avec le produit."], "expl": "On retire les vêtements souillés et on rince abondamment la peau à l'eau."}, {"type": "qcm", "id": "3t", "enonce": "Pourquoi utilise-t-on du Dakin et non de l'eau de Javel pour laver une plaie ?", "choix": ["le Dakin est beaucoup plus dilué et adapté aux tissus vivants", "le Dakin ne contient pas d'ions hypochlorite", "l'eau de Javel ne tue pas les bactéries", "le Dakin est un acide"], "bonne": 0, "pouces": ["Les deux contiennent la même espèce active, l'ion hypochlorite.", "La différence est la concentration et l'usage."], "expl": "Le Dakin est une solution d'hypochlorite très diluée et stabilisée : c'est un antiseptique. L'eau de Javel est un désinfectant, trop agressive pour la peau."}]];
+
+/* ================================================================ écriture chimique
+   _2 indice, ^+ ^- ^{2+} exposant, -> flèche, Cl -> Cℓ, I de l'iode à empattements */
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function ch(s){
+  s = esc(s.replace(/->/g,"→"));
+  s = s.replace(/(^|[^A-Za-zÀ-ÿ])Cl(?![a-zà-ÿ])/g,"$1Cℓ");
+  s = s.replace(/(^|[^A-Za-zÀ-ÿ(I])I(?=[_^])/g,'$1<span class="iode">I</span>');
+  s = s.replace(/\^\{([^}]*)\}/g,(m,a)=>"<sup>"+a.replace(/-/g,"−")+"</sup>");
+  s = s.replace(/\^([0-9]*[+\-])/g,(m,a)=>"<sup>"+a.replace(/-/g,"−")+"</sup>");
+  s = s.replace(/_\{([^}]*)\}/g,"<sub>$1</sub>").replace(/_(\d+)/g,"<sub>$1</sub>");
+  s = s.replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>");
+  return s;
+}
+
+/* ================================================================ contenu */
+const ETAPES = [
+{
+  id:1, nom:"Étape 1 · Couples rédox", lieu:"Pharmacie de l'hôpital",
+  intro:"La pharmacienne te montre les antiseptiques et désinfectants du service. Pour comprendre comment ils tuent les microbes, il faut savoir reconnaître un oxydant et un réducteur.",
+  cours:`
+  <h3>B. Oxydants et réducteurs</h3>
+  <p>Un <strong>oxydant</strong> est une espèce chimique capable de <strong>capter</strong> un ou plusieurs électrons. Un <strong>réducteur</strong> est une espèce chimique capable de <strong>céder</strong> un ou plusieurs électrons.</p>
+  <p>Pour ne pas confondre : le <strong>R</strong>éducteur <strong>R</strong>end des électrons, l'<strong>O</strong>xydant les <strong>O</strong>btient.</p>
+  <p>Un oxydant et un réducteur forment un <strong>couple oxydant/réducteur</strong>, noté Ox/Red (l'oxydant toujours à gauche). Ils sont reliés par une <strong>demi-équation</strong> :</p>
+  <p class="eq">Ox + n e<sup>−</sup> = Red</p>
+  <p>Exemple : ${ch("I_2 + 2 e^- = 2 I^-")} pour le couple ${ch("I_2/I^-")}.</p>
+  <p><strong>Méthode :</strong> dans une demi-équation, l'oxydant est <strong>du même côté que les électrons</strong> ; le réducteur est de l'autre côté. Les ions ${ch("H^+")} et l'eau servent seulement à équilibrer.</p>
+  <p>Une <strong>réduction</strong> est un <strong>gain</strong> d'électrons (l'oxydant est réduit). Une <strong>oxydation</strong> est une <strong>perte</strong> d'électrons (le réducteur est oxydé). Exemple : ${ch("Cu = Cu^{2+} + 2 e^-")} : le cuivre cède 2 électrons, il est oxydé.</p>`,
+  banque:BANQUES[0]
+},
+{
+  id:2, nom:"Étape 2 · Équations à équilibrer", lieu:"Laboratoire d'analyses",
+  intro:"Au laboratoire, le technicien prépare des tests sur les produits du service, dont l'alcootest chimique. Il te demande d'écrire les équations des réactions : tu dois trouver tous les coefficients.",
+  cours:`
+  <h3>C. Écrire l'équation d'une réaction d'oxydoréduction</h3>
+  <p>Une <strong>réaction d'oxydoréduction</strong> est un transfert d'électrons du réducteur d'un couple vers l'oxydant d'un autre couple : Ox<sub>1</sub> + Red<sub>2</sub> → Red<sub>1</sub> + Ox<sub>2</sub>.</p>
+  <p><strong>Méthode :</strong></p>
+  <p>1. Je repère l'oxydant et le réducteur qui réagissent.</p>
+  <p>2. J'écris chaque demi-équation dans le sens où elle se produit (électrons à gauche pour l'oxydant, à droite pour le réducteur).</p>
+  <p>3. Je fais en sorte d'avoir <strong>le même nombre d'électrons</strong> dans les deux : je multiplie une demi-équation (ou les deux) par un nombre entier. Dans le jeu, le bouton « ⇄ » retourne une demi-équation et le menu « × » la multiplie.</p>
+  <p>4. J'additionne : <strong>les électrons disparaissent</strong>. Si une même espèce (${ch("H^+")}, ${ch("H_2O")}…) apparaît des deux côtés, je la simplifie. Je vérifie les éléments et les charges, et je garde les plus petits nombres entiers.</p>
+  <p><strong>Exemple :</strong></p>
+  <p class="eq">${ch("H_2O_2 + 2 H^+ + 2 e^- -> 2 H_2O")}<br>${ch("2 I^- -> I_2 + 2 e^-")}</p>
+  <p class="eq">${ch("H_2O_2 + 2 H^+ + 2 I^- -> 2 H_2O + I_2")}</p>`,
+  banque:BANQUES[1]
+},
+{
+  id:3, nom:"Étape 3 · Sécurité", lieu:"Service de soins",
+  intro:"Dans le service, l'infirmière cadre vérifie que tu connais les règles de sécurité avant de te laisser manipuler les produits.",
+  cours:`
+  <h3>D. Utiliser ces produits en toute sécurité</h3>
+  <p><strong>Ne jamais mélanger</strong> l'eau de Javel avec un produit acide (détartrant, vinaigre) : il se forme du <strong>dichlore</strong> ${ch("Cl_2")}, gaz très toxique. ${ch("ClO^- + Cl^- + 2 H^+ -> Cl_2 + H_2O")}. Mention EUH031 : « Au contact d'un acide, dégage un gaz toxique ».</p>
+  <p>L'<strong>eau oxygénée vieillit</strong> : ${ch("2 H_2O_2 -> 2 H_2O + O_2")}. La lumière et la chaleur accélèrent ce vieillissement : flacon <strong>opaque, fermé, au frais</strong>.</p>
+  <p>Diluer l'eau de Javel dans de l'<strong>eau froide</strong>. Porter <strong>gants et lunettes</strong>, aérer. Garder les produits dans leur emballage d'origine. Tenir l'alcool et les gels hydroalcooliques <strong>loin des flammes</strong>.</p>
+  <p><strong>Gestes de secours :</strong> projection → rincer à l'eau au moins 15 minutes ; inhalation → quitter la pièce, aérer, appeler le 15 si besoin ; ingestion → ne pas faire vomir, appeler le centre antipoison ou le 15.</p>
+  <p><strong>Pictogrammes :</strong></p>
+  <div class="pictos" style="pointer-events:none">
+    <div class="picto"><img src="${PICTOS.corrosif}" alt=""><span>corrosif</span></div>
+    <div class="picto"><img src="${PICTOS.nocif}" alt=""><span>nocif / irritant</span></div>
+    <div class="picto"><img src="${PICTOS.inflammable}" alt=""><span>inflammable</span></div>
+    <div class="picto"><img src="${PICTOS.comburant}" alt=""><span>comburant</span></div>
+    <div class="picto"><img src="${PICTOS.environnement}" alt=""><span>environnement</span></div>
+  </div>`,
+  banque:BANQUES[2]
+}];
+const PICTO_NOM = {inflammable:"inflammable",corrosif:"corrosif",comburant:"comburant",environnement:"environnement",nocif:"nocif / irritant",toxique:"toxique"};
+
+/* ================================================================ état */
+const S = {
+  eleve:null,
+  etapes: ETAPES.map(e=>({reussie:false, tentatives:0, ok:0, vus:[], pouces:0, poucesDetail:[], details:[]})),
+  envoiFinal:false
+};
+const ACT = {sorties:0, horsMs:0, copies:0, temps:[], rapides:0, apresSortie:0, coursOuvert:0};
+let horsDepuis = null, sortieQuestion = false;
+
+function sortie(){ if(horsDepuis===null){ horsDepuis=Date.now(); ACT.sorties++; sortieQuestion=true; } }
+function retour(){ if(horsDepuis!==null){ ACT.horsMs += Date.now()-horsDepuis; horsDepuis=null; } }
+document.addEventListener("visibilitychange",()=>{ document.hidden ? sortie() : retour(); });
+window.addEventListener("blur",sortie);
+window.addEventListener("focus",retour);
+document.addEventListener("copy",()=>{ ACT.copies++; });
+
+function mediane(a){ if(!a.length) return 0; const b=[...a].sort((x,y)=>x-y); const m=Math.floor(b.length/2); return b.length%2?b[m]:(b[m-1]+b[m])/2; }
+function shuffle(a){ a=[...a]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+
+/* ================================================================ affichage */
+const app = document.getElementById("app");
+let fs = 18;
+document.getElementById("btnFont").onclick = ()=>{ fs = fs>=22?16:fs+2; document.documentElement.style.setProperty("--fs",fs+"px"); if(document.querySelector(".eqline")) requestAnimationFrame(ajusterTailles); };
+document.getElementById("btnSend").onclick = ()=>{
+  if(confirm("Envoyer tes résultats à ton professeur maintenant ? Tu pourras continuer à jouer ensuite.")) envoyer(false);
+};
+
+function accueil(){
+  if(typeof sonAccueil==="function") setTimeout(()=>sonAccueil(true),0);
+  app.innerHTML = `
+  <div class="card">
+    <h1>Mission au CHU</h1>
+    <p>Tu commences ton stage dans un centre hospitalier. L'équipe d'hygiène lutte contre les infections associées aux soins et utilise chaque jour des antiseptiques et des désinfectants. Pour être autorisé(e) à les manipuler, tu dois réussir trois étapes :</p>
+    <p>1. à la pharmacie, reconnaître les couples oxydant/réducteur ;</p>
+    <p>2. au laboratoire, équilibrer les équations des réactions ;</p>
+    <p>3. dans le service, connaître les règles de sécurité.</p>
+    <p>Chaque étape comporte ${NB_Q} questions. Il faut au moins ${SEUIL} bonnes réponses sur ${NB_Q} pour la valider et passer à la suivante : dès la 2<sup>e</sup> erreur, l'étape recommence à la question 1 avec de nouvelles questions. Chaque question propose 2 coups de pouce : ils sont signalés à ton professeur si tu les utilises.</p>
+    <label for="prenom">Prénom</label><input type="text" id="prenom" autocomplete="given-name">
+    <label for="nom">Première lettre de ton nom</label><input type="text" id="nom" maxlength="1" autocomplete="off" style="max-width:5rem;text-transform:uppercase">
+    <label for="classe">Classe</label><input type="text" id="classe" value="1ST2S">
+    <p class="err" id="errId"></p>
+    <button class="btn" id="go">Commencer la mission</button>
+  </div>`;
+  document.getElementById("go").onclick = ()=>{
+    const p=document.getElementById("prenom").value.trim(), n=document.getElementById("nom").value.trim(), c=document.getElementById("classe").value.trim();
+    if(!p||!n||!c){ document.getElementById("errId").textContent="Remplis ton prénom, la première lettre de ton nom et ta classe."; return; }
+    const ini=n.charAt(0).toUpperCase();
+    S.eleve={prenom:p,nom:ini,classe:c};
+    TEST = /^test$/i.test(p) && ini==="T";
+    if(TEST) S.etapes.forEach(st=>{ st.reussie=false; });
+    sonAccueil(false);
+    document.getElementById("who").textContent = p+" "+ini+". · "+c+(TEST?" · MODE TEST":"");
+    if(!TEST) document.getElementById("btnSend").classList.remove("hidden");
+    carte();
+  };
+}
+
+function carte(){
+  const html = ETAPES.map((e,i)=>{
+    const st=S.etapes[i], locked = !TEST && i>0 && !S.etapes[i-1].reussie;
+    const cls = st.reussie?"done":(locked?"locked":"");
+    const etat = st.reussie?`Validée (${st.ok}/${NB_Q})`:(locked?"Verrouillée":(st.tentatives?`À refaire (dernier essai : ${st.ok}/${NB_Q})`:"À faire"));
+    return `<div class="step ${cls}">
+      <div class="row"><div class="num">${st.reussie?"✓":e.id}</div><div><strong>${e.nom}</strong><div class="lieu">${e.lieu}</div></div></div>
+      <div class="etat">${etat}</div>
+      <button class="btn ${st.reussie?"ghost":""}" ${locked?"disabled":""} data-i="${i}">${st.reussie?"Revoir le cours":(st.tentatives?"Recommencer":"Commencer")}</button>
+    </div>`;
+  }).join("");
+  const fini = S.etapes.every(s=>s.reussie);
+  app.innerHTML = (TEST?`<div class="card fb bad" style="margin-bottom:0">🧪 Mode test enseignant : les 3 étapes sont déverrouillées et aucun résultat n'est envoyé.</div>`:"")
+    + `<div class="card"><h2>Ton parcours de stage</h2><div class="steps">${html}</div></div>`
+    + (fini?`<div class="card center"><div class="big">🏅</div><h2>Mission accomplie !</h2><p>${TEST?"Mode test : aucun résultat n'a été envoyé.":"Tu as validé les trois étapes. Tes résultats ont été envoyés à ton professeur."}</p><p class="status" id="statusFin"></p></div>`:"");
+  app.querySelectorAll(".step .btn").forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.i; S.etapes[i].reussie ? voirCours(i,true) : voirCours(i,false);
+  });
+  if(fini && !S.envoiFinal && !TEST){ S.envoiFinal=true; envoyer(true); }
+}
+
+function voirCours(i,seul){
+  const e=ETAPES[i];
+  app.innerHTML = `<div class="card">
+    <h2>${e.nom} – ${e.lieu}</h2>
+    <p>${e.intro}</p>
+    <div class="cours">${e.cours}</div>
+    <div class="row" style="margin-top:1rem">
+      ${seul?`<button class="btn" id="back">Retour au parcours</button>`:`<button class="btn" id="start">J'ai lu, je commence</button><button class="btn ghost" id="back">Retour</button>`}
+    </div></div>`;
+  document.getElementById("back").onclick=carte;
+  if(!seul) document.getElementById("start").onclick=()=>demarrer(i);
+}
+
+/* ================================================================ déroulé d'une étape */
+let run=null;
+function demarrer(i){
+  const st=S.etapes[i], banque=ETAPES[i].banque;
+  let neufs = shuffle(banque.filter(q=>!st.vus.includes(q.id)));
+  if(neufs.length<NB_Q) neufs = neufs.concat(shuffle(banque.filter(q=>!neufs.includes(q))));
+  const qs = neufs.slice(0,NB_Q);
+  qs.forEach(q=>{ if(!st.vus.includes(q.id)) st.vus.push(q.id); });
+  st.tentatives++;
+  run={i, qs, n:0, res:[], pouces:[]};
+  question();
+}
+
+function coefTxt(c){ return c===1?"":c+" "; }
+function cote(liste,m){ return liste.map(([sp,c])=>coefTxt(c*m)+ch(sp)).join(" + "); }
+function demiTxt(dm,m,inv){ return inv ? cote(dm.d,m)+" = "+cote(dm.g,m) : cote(dm.g,m)+" = "+cote(dm.d,m); }
+function majDemi(q,k){
+  const dm=q.demis[k], m=run.mult[k], inv=run.inv[k];
+  document.getElementById("demiL"+k).innerHTML = cote(inv?dm.d:dm.g, m);
+  document.getElementById("demiR"+k).innerHTML = cote(inv?dm.g:dm.d, m);
+  ajusterTailles();
+}
+/* réduit la taille du texte pour que l'équation tienne sur une ligne (minimum lisible, sinon défilement) */
+function ajuster(el, maxEm, minEm){
+  if(!el) return;
+  let t=maxEm; el.style.fontSize=t+"em";
+  while(el.scrollWidth>el.clientWidth+1 && t>minEm){ t=Math.round((t-0.03)*100)/100; el.style.fontSize=t+"em"; }
+}
+function ajusterTailles(){
+  ajuster(document.querySelector(".eqline"),1.15,0.62);
+  ajuster(document.querySelector(".demiswrap"),1.05,0.6);
+}
+window.addEventListener("resize",()=>{ if(document.querySelector(".eqline")) ajusterTailles(); });
+function ligneEq(q){
+  const cases = liste => liste.map(([sp],k)=>`<input class="coef" inputmode="numeric" maxlength="2" aria-label="coefficient de ${sp.replace(/[_^{}]/g,"")}">${ch(sp)}`).join('<span class="op">+</span>');
+  return cases(q.g)+'<span class="op">→</span>'+cases(q.d);
+}
+function eqTxt(q){ return cote(q.g,1)+" → "+cote(q.d,1); }
+
+function question(){
+  const e=ETAPES[run.i], q=run.qs[run.n];
+  run.t0=Date.now(); sortieQuestion=false; run.used=0; run.locked=false; run.sel=null;
+  const dots = run.qs.map((_,k)=>{
+    const r=run.res[k]; return `<div class="dot ${k===run.n?"cur":""} ${r===true?"ok":r===false?"ko":""}">${k+1}</div>`;
+  }).join("");
+  let corps="";
+  if(q.donnees) corps += `<div class="donnees"><strong>Données</strong>${q.donnees.map(d=>`<div class="eq">${ch(d)}</div>`).join("")}</div>`;
+  if(q.type==="qcm"){
+    run.ordre = shuffle(q.choix.map((c,k)=>k));
+    corps += `<div class="choices" role="group">${run.ordre.map(k=>`<button class="choice" data-k="${k}">${ch(q.choix[k])}</button>`).join("")}</div>`;
+  } else if(q.type==="picto"){
+    run.ordre = shuffle(q.choix.map((c,k)=>k));
+    corps += `<div class="pictos" role="group">${run.ordre.map(k=>`<button class="picto" data-k="${k}" aria-label="${PICTO_NOM[q.choix[k]]}"><img src="${PICTOS[q.choix[k]]}" alt=""></button>`).join("")}</div>`;
+  } else if(q.type==="eq"){
+    run.mult = q.demis.map(()=>1); run.inv = q.demis.map(()=>false);
+    corps += `<div class="donnees"><strong>Demi-équations</strong> <span class="note">(« ⇄ » retourne la demi-équation, « × » multiplie ses coefficients)</span>
+      <div class="demiswrap"><div class="demis">${q.demis.map((dm,k)=>`
+        <div class="ctrl"><button type="button" class="inv" data-inv="${k}" aria-pressed="false" title="Retourner la demi-équation">⇄</button>
+        <label class="mult">×
+        <select data-m="${k}" aria-label="multiplicateur de la demi-équation ${k+1}">${[1,2,3,4,5,6].map(v=>`<option value="${v}">${v}</option>`).join("")}</select></label></div>
+        <span class="dl" id="demiL${k}">${cote(dm.g,1)}</span><span class="de">=</span><span class="dr" id="demiR${k}">${cote(dm.d,1)}</span>`).join("")}
+      </div></div></div>
+      <div class="eqline"><div class="eqin">${ligneEq(q)}</div></div>
+      <p class="note">Écris tous les coefficients, avec les plus petits nombres entiers possibles (écris 1 quand il n'y a qu'une seule entité).</p>`;
+  } else {
+    const parts=q.eq.split("[?]");
+    corps += `<div class="eqline">${parts.map((p,k)=>ch(p)+(k<parts.length-1?`<input class="coef" inputmode="numeric" maxlength="2" aria-label="coefficient ${k+1}">`:"")).join("")}</div>
+      <p class="note">Écris les nombres manquants dans les cases.</p>`;
+  }
+  app.innerHTML = `<div class="card">
+    <div class="row"><h2 style="margin:0">${e.nom}</h2><div class="sp" style="flex:1"></div><button class="btn ghost" id="coursBtn" style="padding:.3rem .8rem;font-size:.85rem">Revoir le cours</button></div>
+    <div class="dots">${dots}</div>
+    <p class="enonce">${ch(q.enonce)}</p>
+    ${corps}
+    <div class="hints">
+      <button class="hint-btn" id="h1">💡 Coup de pouce 1</button>
+      <button class="hint-btn" id="h2" disabled>💡 Coup de pouce 2</button>
+    </div>
+    <div id="hintZone"></div>
+    <div id="fb" aria-live="polite"></div>
+    <div class="row"><button class="btn" id="valider" disabled>Valider</button></div>
+  </div>
+  <div id="coursZone"></div>`;
+
+  const valider=document.getElementById("valider");
+  app.querySelectorAll(".choice,.picto").forEach(b=>b.onclick=()=>{
+    if(run.locked) return;
+    app.querySelectorAll(".choice,.picto").forEach(x=>x.classList.remove("sel"));
+    b.classList.add("sel"); run.sel=+b.dataset.k; valider.disabled=false;
+  });
+  app.querySelectorAll("input.coef").forEach(inp=>inp.oninput=()=>{
+    inp.value=inp.value.replace(/[^0-9]/g,"");
+    valider.disabled = [...app.querySelectorAll("input.coef")].some(x=>x.value==="");
+  });
+  app.querySelectorAll("select[data-m]").forEach(sel=>sel.onchange=()=>{
+    if(run.locked) return;
+    const k=+sel.dataset.m; run.mult[k]=+sel.value;
+    majDemi(q,k);
+  });
+  app.querySelectorAll("button[data-inv]").forEach(bt=>bt.onclick=()=>{
+    if(run.locked) return;
+    const k=+bt.dataset.inv; run.inv[k]=!run.inv[k];
+    bt.setAttribute("aria-pressed", run.inv[k]); bt.classList.toggle("on", run.inv[k]);
+    majDemi(q,k);
+  });
+  document.getElementById("h1").onclick=()=>pouce(0);
+  document.getElementById("h2").onclick=()=>pouce(1);
+  document.getElementById("coursBtn").onclick=()=>{
+    ACT.coursOuvert++;
+    const z=document.getElementById("coursZone");
+    z.innerHTML = z.innerHTML?"":`<div class="card"><div class="cours">${e.cours}</div></div>`;
+    if(z.innerHTML) z.scrollIntoView({behavior:"smooth"});
+  };
+  valider.onclick=corriger;
+  if(q.type==="eq") requestAnimationFrame(ajusterTailles);
+  window.scrollTo(0,0);
+}
+
+function pouce(k){
+  if(run.locked) return;
+  const q=run.qs[run.n];
+  if(k===0 && run.used<1){ run.used=1; document.getElementById("h1").disabled=true; document.getElementById("h2").disabled=false; }
+  else if(k===1 && run.used<2){ run.used=2; document.getElementById("h2").disabled=true; }
+  else return;
+  document.getElementById("hintZone").insertAdjacentHTML("beforeend",`<div class="hint">💡 ${ch(q.pouces[k])}</div>`);
+}
+
+function corriger(){
+  if(run.locked) return;
+  run.locked=true;
+  const q=run.qs[run.n], st=S.etapes[run.i];
+  const dt=(Date.now()-run.t0)/1000;
+  let juste;
+  let msgEq="";
+  if(q.type==="eq"){
+    const inps=[...app.querySelectorAll("input.coef")];
+    const att=[...q.g,...q.d].map(x=>x[1]);
+    const v=inps.map(x=>parseInt(x.value,10));
+    juste = v.every((x,k)=>x===att[k]);
+    const prop = !juste && v.every(x=>x>0) && v.every((x,k)=>x*att[0]===att[k]*v[0]);
+    if(prop) msgEq=" Ton équation est équilibrée, mais il fallait la simplifier (plus petits nombres entiers).";
+    inps.forEach((x,k)=>{ x.disabled=true; x.classList.add(v[k]===att[k]?"good":"bad"); });
+    app.querySelectorAll("select[data-m],button[data-inv]").forEach(x=>x.disabled=true);
+    run.multUtilises = run.mult.map((m,k)=>(run.inv[k]?"⇄":"")+m).join("/");
+  } else if(q.type==="coef"){
+    const inps=[...app.querySelectorAll("input.coef")];
+    juste = inps.every((x,k)=>parseInt(x.value,10)===q.rep[k]);
+    inps.forEach((x,k)=>{ x.disabled=true; x.classList.add(parseInt(x.value,10)===q.rep[k]?"good":"bad"); });
+  } else {
+    juste = run.sel===q.bonne;
+    app.querySelectorAll(".choice,.picto").forEach(b=>{
+      b.disabled=true; const k=+b.dataset.k;
+      if(k===q.bonne) b.classList.add("good"); else if(k===run.sel) b.classList.add("bad");
+    });
+  }
+  document.getElementById("h1").disabled=true; document.getElementById("h2").disabled=true;
+  ACT.temps.push(Math.round(dt*10)/10);
+  if(dt<RAPIDE_S) ACT.rapides++;
+  if(sortieQuestion) ACT.apresSortie++;
+  run.res[run.n]=juste;
+  if(run.used>0){ st.pouces+=run.used; st.poucesDetail.push(`${q.id}:${run.used}`); }
+  st.details.push({essai:st.tentatives, q:q.id, juste, temps:Math.round(dt), pouces:run.used, sortie:sortieQuestion, ...(q.type==="eq"?{mult:run.multUtilises}:{})});
+  document.getElementById("fb").innerHTML = `<div class="fb ${juste?"good":"bad"}"><strong>${juste?"Bonne réponse !":"Ce n'est pas ça."}</strong>${msgEq} ${q.type==="eq"?"Réponse : "+eqTxt(q)+". ":""}${ch(q.expl)}</div>`;
+  const v=document.getElementById("valider");
+  const erreurs = run.res.filter(x=>x===false).length;
+  if(erreurs > NB_Q-SEUIL){
+    /* trop d'erreurs : l'étape ne peut plus être validée -> retour automatique à la question 1 */
+    st.ok = run.res.filter(x=>x).length;
+    st.arrets = (st.arrets||0)+1;
+    document.getElementById("fb").insertAdjacentHTML("beforeend",
+      `<div class="fb bad">⚠️ ${erreurs} erreurs : il faut au moins ${SEUIL} bonnes réponses sur ${NB_Q}. L'étape recommence à la question 1 avec de nouvelles questions.</div>`);
+    let n=15;
+    const relancer=()=>{ clearInterval(run.chrono); demarrer(run.i); };
+    v.textContent=`Recommencer à la question 1 (${n} s)`; v.disabled=false; v.onclick=relancer; v.focus();
+    run.chrono=setInterval(()=>{ n--; if(n<=0) relancer(); else v.textContent=`Recommencer à la question 1 (${n} s)`; },1000);
+    return;
+  }
+  v.textContent = run.n<NB_Q-1?"Question suivante":"Voir mon résultat";
+  v.disabled=false;
+  v.onclick=()=>{ run.n++; run.n<NB_Q?question():bilan(); };
+  v.focus();
+}
+
+function bilan(){
+  const st=S.etapes[run.i], e=ETAPES[run.i];
+  const ok=run.res.filter(x=>x).length;
+  st.ok=ok;
+  const reussi = ok>=SEUIL;
+  if(reussi) st.reussie=true;
+  const suivante = run.i<ETAPES.length-1;
+  app.innerHTML = `<div class="card center">
+    <h2>${e.nom}</h2>
+    <div class="score">${ok} / ${NB_Q}</div>
+    ${reussi
+      ? `<p>Étape validée ! ${suivante?"L'étape suivante est débloquée.":"Tu as terminé toutes les étapes."}</p>`
+      : `<p>Il faut au moins ${SEUIL} bonnes réponses pour valider l'étape. Relis le cours, puis recommence : tu auras de nouvelles questions.</p>`}
+    <div class="row" style="justify-content:center;margin-top:1rem">
+      ${reussi?`<button class="btn" id="suite">Continuer</button>`:`<button class="btn" id="retry">Relire le cours et recommencer</button><button class="btn ghost" id="suite">Retour au parcours</button>`}
+    </div></div>`;
+  document.getElementById("suite").onclick=carte;
+  const r=document.getElementById("retry"); if(r) r.onclick=()=>voirCours(run.i,false);
+}
+
+/* ================================================================ envoi au worker */
+function payload(){
+  const tot = NB_Q*ETAPES.length;
+  const ok = S.etapes.reduce((a,s)=>a+s.ok,0);
+  if(horsDepuis!==null){ ACT.horsMs += Date.now()-horsDepuis; horsDepuis=Date.now(); }
+  return {
+    prenom:S.eleve.prenom, nom:S.eleve.nom, initiale:S.eleve.nom, classe:S.eleve.classe, jeu:JEU,
+    pct:Math.round(100*ok/tot), ok, tot,
+    missions: ETAPES.map((e,i)=>{ const s=S.etapes[i]; return {
+      mission:e.nom, reussie:s.reussie, tentatives:s.tentatives, arretsApres2Erreurs:s.arrets||0, ok:s.ok, tot:NB_Q,
+      coupsDePouce:s.pouces, coupsDePouceDetail:s.poucesDetail.join(" "), details:s.details }; }),
+    coupsDePouce: S.etapes.reduce((a,s)=>a+s.pouces,0),
+    activite:{
+      sortiesPage:ACT.sorties, tempsHorsPage:Math.round(ACT.horsMs/1000), copies:ACT.copies,
+      tempsMedian:mediane(ACT.temps), reponsesRapides:ACT.rapides, reponsesApresSortie:ACT.apresSortie,
+      coursConsulte:ACT.coursOuvert, versionLisible:!!ACT.versionLisible
+    },
+    termine:S.etapes.every(s=>s.reussie),
+    date:new Date().toISOString()
+  };
+}
+
+async function envoyer(auto){
+  if(TEST || !S.eleve) return;   // mode test : jamais d'envoi
+  const zone = document.getElementById("statusFin");
+  const dire = m=>{ if(zone) zone.textContent=m; else if(!auto) alert(m); };
+  const data = payload();
+  try{ localStorage.setItem("hopital_desinf_dernier_envoi", JSON.stringify(data)); }catch(e){}
+  try{
+    const r = await fetch(WORKER,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)});
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    dire("✅ Résultats envoyés à ton professeur.");
+  }catch(err){
+    dire("⚠️ L'envoi n'a pas fonctionné. Vérifie la connexion puis clique sur « Envoyer mes résultats » en haut de la page.");
+  }
+}
+
+/* ================================================================ thème */
+let THEME = (location.search.match(/[?&]theme=(\w+)/)||[])[1] || "neon";
+try{ if(!/[?&]theme=/.test(location.search) && localStorage.getItem("chu_lisible")==="1") THEME="clean"; }catch(e){}
+document.body.dataset.theme = THEME;
+ACT.versionLisible = THEME==="clean";
+const btnLisible=document.getElementById("btnLisible");
+function majBoutonLisible(){ const c=document.body.dataset.theme==="clean"; btnLisible.innerHTML = c ? '⚡<span class="lbl"> Version néon</span>' : '👁<span class="lbl"> Version plus lisible</span>'; btnLisible.setAttribute("aria-label", c?"Version néon":"Version plus lisible"); }
+majBoutonLisible();
+btnLisible.onclick=()=>{
+  const lisible = document.body.dataset.theme!=="clean";
+  document.body.dataset.theme = lisible ? "clean" : "neon";
+  if(lisible) ACT.versionLisible = true;
+  try{ localStorage.setItem("chu_lisible", lisible?"1":"0"); }catch(e){}
+  majBoutonLisible(); if(surAccueil) demarrerECG(); if(document.querySelector(".eqline")) requestAnimationFrame(ajusterTailles);
+};
+
+/* ---------------------------------------------------------------- bip cardiaque (page d'accueil) */
+const ECG_T = 1.6;                 // durée d'un tracé (2 battements) en secondes
+const PICS = [0.325, 0.65];        // position des pics dans le tracé
+let audio=null, sonOn=true, surAccueil=false, ecgT0=0, derPhase=0, rafId=null;
+try{ if(localStorage.getItem("chu_son")==="0") sonOn=false; }catch(e){}
+const btnSon=document.getElementById("btnSon");
+function majBoutonSon(){ btnSon.innerHTML = sonOn ? '🔊<span class="lbl"> Son</span>' : '🔇<span class="lbl"> Son coupé</span>'; btnSon.classList.toggle("hidden", !surAccueil); }
+function initAudio(){
+  if(!audio){ try{ audio = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ audio=null; } }
+  if(audio && audio.state==="suspended") audio.resume();
+}
+function bip(){
+  if(!audio || !sonOn || audio.state!=="running") return;
+  const t=audio.currentTime, o=audio.createOscillator(), g=audio.createGain();
+  o.type="sine"; o.frequency.value=980;
+  g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.25,t+0.01); g.gain.exponentialRampToValueAtTime(0.0001,t+0.13);
+  o.connect(g).connect(audio.destination); o.start(t); o.stop(t+0.15);
+}
+function demarrerECG(){
+  const path=document.querySelector(".ecg path");
+  document.documentElement.style.setProperty("--ecg-t", ECG_T+"s");
+  if(path){ path.style.animation="none"; void path.getBoundingClientRect(); path.style.animation=""; }
+  ecgT0=performance.now(); derPhase=0;
+}
+function boucle(){
+  if(!surAccueil){ rafId=null; return; }
+  const ph=((performance.now()-ecgT0)/1000/ECG_T)%1;
+  PICS.forEach(p=>{ if((derPhase<p && ph>=p) || (ph<derPhase && p>derPhase)) bip(); });
+  derPhase=ph; rafId=requestAnimationFrame(boucle);
+}
+function sonAccueil(actif){
+  surAccueil=actif; majBoutonSon();
+  if(actif){ demarrerECG(); if(!rafId) rafId=requestAnimationFrame(boucle); }
+}
+btnSon.onclick=()=>{ sonOn=!sonOn; try{localStorage.setItem("chu_son",sonOn?"1":"0");}catch(e){} initAudio(); majBoutonSon(); };
+["pointerdown","keydown"].forEach(ev=>document.addEventListener(ev,()=>{ if(surAccueil) initAudio(); }));
+if(THEME==="bio"){
+  const d=document.getElementById("deco"); let h="";
+  const cols=["#7CF29C","#B892FF","#4FD1C5","#FFD166"];
+  for(let k=0;k<7;k++){ const s=60+Math.random()*160, c=cols[k%4];
+    h+=`<div class="blob" style="width:${s}px;height:${s}px;left:${Math.random()*95}%;top:${Math.random()*90}%;background:radial-gradient(circle at 35% 35%,${c}88,${c}11 70%);animation-delay:-${k*3}s"></div>`; }
+  for(let k=0;k<6;k++){ const c=cols[(k+1)%4];
+    h+=`<svg class="bact" width="90" height="40" style="left:${Math.random()*92}%;top:${Math.random()*92}%;animation-delay:-${k*4}s" viewBox="0 0 90 40"><rect x="5" y="5" width="80" height="30" rx="15" fill="${c}33" stroke="${c}" stroke-width="2"/><path d="M25,20 q5,-8 10,0 t10,0 t10,0" stroke="${c}" stroke-width="2" fill="none"/></svg>`; }
+  d.innerHTML=h;
+}
+accueil();
+</script>
+</body>
+</html>
